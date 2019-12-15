@@ -24,7 +24,8 @@ module.exports.boot = async term => {
     return;
   }  
 
-  const hasCachedVM = await cache.hasState();
+  await warmBoot(term);
+  /* const hasCachedVM = await cache.hasState();
   if (hasCachedVM) {
     try {
       await warmBoot(term);
@@ -34,7 +35,7 @@ module.exports.boot = async term => {
     }
   } else {
     await coldBoot(term);
-  }
+  } */
 
   // Reduce CPU/battery use when not in focus
   // TODO: we might want to add UI to disable this later
@@ -108,7 +109,8 @@ const warmBoot = async term => {
   // Add saved state URL for vm
   const options = getVMStartOptions();
 
-  return cache.getState()
+  // return cache.getState()
+  return fetch('browser-shell/dist/bin/state.bin')
     .then(response => response.arrayBuffer())
     .then(arrayBuffer =>
       URL.createObjectURL(new Blob([arrayBuffer], { type: 'application/octet-stream' } )))
