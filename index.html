@@ -307,6 +307,7 @@ header > .login-form.phase-3 > .phaseless-content
     <script src="three.js"></script>
     <script src="OrbitControls.js"></script>
     <script src="Reflector.js"></script>
+    <script src="dist/index.js"></script>
   </head>
   <body>
     <div class=body>
@@ -371,7 +372,9 @@ header > .login-form.phase-3 > .phaseless-content
         </div>
       </div>
 
-      <div class=iframe-wrapper id=iframe-wrapper></div>
+      <div class=iframe-wrapper id=iframe-wrapper>
+        <div id=terminal></div>
+      </div>
 
       <div class=multibutton>
         <a class="button first" id="enable-mic-button" style="display: none;">Enable Mic</a>
@@ -527,28 +530,6 @@ enterXrButton.addEventListener('click', async () => {
     console.log('no xr');
     noXrButton.style.display = null;
   }
-
-  /* const microphonePermission = await navigator.permissions.query({
-    name: 'microphone',
-  });
-  if (microphonePermission.state === 'granted') {
-    microphoneMediaStream  = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-    });
-    disableMicButton.style.display = null;
-  } else {
-    enableMicButton.style.display = null;
-  } */
-  enableMicButton.style.display = null;
-
-  const {href} = aAvatars[1];
-  const model = await _loadModelUrl(href);
-  _setLocalModel(model);
-  modelUrl = href;
-  _sendAllPeerConnections(JSON.stringify({
-    method: 'model',
-    url: modelUrl,
-  }));
 })();
 
 let loginToken = null;
@@ -577,22 +558,11 @@ async function doLogin(email, code) {
     return false;
   }
 }
-const storage = {
-  async get(k) {
-    const s = localStorage.getItem(k);
-    if (typeof s === 'string') {
-      return JSON.parse(s);
-    } else {
-      return undefined;
-    }
-  },
-  async set(k, v) {
-    localStorage.setItem(k, JSON.stringify(v));
-  },
-  async remove(k) {
-    localStorage.removeItem(k);
-  },
-};
+
+const term = (window.term = new Terminal({ theme: molokaiTheme }));
+term.open(document.getElementById('terminal'));
+term.fit();
+vm.boot(term);
     </script>
   </body>
 </html>
