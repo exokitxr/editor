@@ -309,6 +309,8 @@ header > .login-form.phase-3 > .phaseless-content
     <script src="OrbitControls.js"></script>
     <script src="Reflector.js"></script>
     <script src="dist/index.js"></script>
+    <script src="textor/dist/texteditor.js"></script>
+    <script src="textor/dist/javascript.js"></script>
   </head>
   <body>
     <div class=body>
@@ -352,6 +354,7 @@ header > .login-form.phase-3 > .phaseless-content
 
       <div class=iframe-wrapper id=iframe-wrapper>
         <div id=terminal></div>
+        <canvas id=editor></canvas>
       </div>
 
       <div class=multibutton>
@@ -544,6 +547,15 @@ async function doLogin(email, code) {
   term.open(document.getElementById('terminal'));
   term.fit();
   vm.boot(term);
+
+  const editor = new Textor.TextEditor(document.getElementById("editor"));
+  editor.addEventListener('textchanged', e => {
+    console.log('text changed', e);
+  });
+  editor.language = new Textor.JavaScriptLanguage();
+  editor.theme = editor.themeManager.get("dark");
+  editor.focus();
+  editor.text = document.querySelector("#data").textContent;
 }
     </script>
   </body>
