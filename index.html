@@ -92,6 +92,15 @@ li {
   flex: 1;
   background-color: #FFF;
 }
+.iframe-wrapper canvas,
+.iframe-wrapper #terminal
+{
+  position: absolute;
+  visibility: hidden;
+}
+.iframe-wrapper #canvas {
+  visibility: visible;
+}
 .tabs {
   position: absolute;
   top: 0;
@@ -414,7 +423,8 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.sortObjects = false;
-// document.getElementById('iframe-wrapper').appendChild(renderer.domElement);
+renderer.domElement.id = 'canvas';
+document.getElementById('iframe-wrapper').appendChild(renderer.domElement);
 
 const orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
 orbitControls.screenSpacePanning = true;
@@ -536,23 +546,69 @@ async function doLogin(email, code) {
   }
 }
 
-{
-  server.start();
+// boot
 
-  const term = (window.term = new Terminal({ theme: molokaiTheme }));
-  term.open(document.getElementById('terminal'));
-  term.fit();
-  vm.boot(term);
+server.start();
 
-  const editor = new Textor.TextEditor(document.getElementById("editor"));
-  editor.addEventListener('textchanged', e => {
-    console.log('text changed', e);
-  });
-  editor.language = new Textor.JavaScriptLanguage();
-  editor.theme = editor.themeManager.get("dark");
-  editor.focus();
-  // editor.text = document.querySelector("#data").textContent;
+const term = (window.term = new Terminal({
+  theme: molokaiTheme,
+}));
+term.open(document.getElementById('terminal'));
+// term.fit();
+vm.boot(term);
+window.term = term;
+
+const editor = new Textor.TextEditor(document.getElementById("editor"));
+editor.addEventListener('textchanged', e => {
+  console.log('text changed', e);
+});
+editor.language = new Textor.JavaScriptLanguage();
+editor.theme = editor.themeManager.get("dark");
+editor.focus();
+// editor.text = document.querySelector("#data").textContent;
+window.editor = editor;
+
+const xtermTextLayerEl = document.querySelector('.xterm-text-layer');
+const planeGeometry = new THREE.PlaneBufferGeometry(2, 1);
+const xtermPlaneMesh = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial({
+  map: new THREE.Texture(
+    xtermTextLayerEl,
+    THREE.UVMapping,
+    THREE.ClampToEdgeWrapping,
+    THREE.ClampToEdgeWrapping,
+    THREE.LinearFilter,
+    THREE.LinearFilter // use mipmapping in webgl2
+  ),
+}));
+xtermPlaneMesh.position.x = -1.5;
+xtermPlaneMesh.position.y = 1;
+xtermPlaneMesh.quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI/4);
+scene.add(xtermPlaneMesh);
+
+const editorEl = document.getElementById('editor');
+const editorPlaneMesh = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial({
+  map: new THREE.Texture(
+    editorEl,
+    THREE.UVMapping,
+    THREE.ClampToEdgeWrapping,
+    THREE.ClampToEdgeWrapping,
+    THREE.LinearFilter,
+    THREE.LinearFilter // use mipmapping in webgl2
+  ),
+}));
+editorPlaneMesh.position.x = 1.5;
+editorPlaneMesh.position.y = 1;
+editorPlaneMesh.quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), -Math.PI/4);
+scene.add(editorPlaneMesh);
+
+function animate() {
+  // console.log('needs update', xtermPlaneMesh.material.map.image);
+  xtermPlaneMesh.material.map.needsUpdate = true;
+  editorPlaneMesh.material.map.needsUpdate = true;
+
+  renderer.render(scene, camera);
 }
+renderer.setAnimationLoop(animate);
     </script>
   </body>
 </html>
