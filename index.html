@@ -1,0 +1,598 @@
+<!doctype html>
+<html>
+  <head>
+    <style>
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background-color: #000;
+  /* color: #F5F5F5; */
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI","Roboto","Oxygen","Ubuntu","Cantarell","Fira Sans","Droid Sans","Helvetica Neue",sans-serif;
+  font-size: 15px;
+}
+.body {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+header {
+  position: absolute;
+  display: flex;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 50px;
+  background-color: #FFF;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.08);
+  align-items: center;
+  user-select: none;
+  z-index: 1;
+}
+header .icon {
+  width: 50px;
+  height: 50px;
+  margin: 0 20px;
+}
+header nav {
+  display: flex;
+  height: 100%;
+  padding: 0 10px;
+  letter-spacing: 0.9px;
+  align-items: center;
+  text-transform: uppercase;
+}
+header nav span {
+  display: flex;
+  height: 30px;
+  padding: 10px;
+  border-radius: 4px;
+  align-items: center;
+}
+header nav.selected span {
+  background-color: #5c6bc0;
+  color: #FFF;
+  cursor: default;
+}
+header nav:not(.selected):hover {
+  cursor: pointer;
+}
+header nav:not(.selected):hover span {
+  background-color: #EEE;
+}
+.examples {
+  width: 200px;
+  padding-top: 50px;
+  background-color: #FFF;
+  overflow-y: auto;
+}
+.avatar-models {
+  display: flex;
+  flex-direction: column;
+}
+.a-avatar {
+  cursor: pointer;
+}
+h1, h2, h3, h4, h5, h6, p, .examples > .multibutton {
+  margin: 15px 0;
+  padding: 0 20px;
+  font-weight: inherit;
+}
+li {
+  /* padding-left: 20px;
+  padding-right: 20px; */
+}
+.iframe-wrapper {
+  position: relative;
+  display: flex;
+  margin-top: 50px;
+  flex: 1;
+  background-color: #FFF;
+}
+.tabs {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+.tabs .tab {
+  display: inline-flex;
+  margin: 5px 5px;
+  padding: 5px 10px;
+  background-color: #D8D8D8;
+  border-radius: 4px;
+  color: #000;
+  align-items: center;
+}
+.tabs .tab .text {
+  margin-right: 10px;
+  align-items: center;
+}
+.tabs .tab .close-x {
+  display: flex;
+  width: 20px;
+  height: 20px;
+  background-color: #ef5350;
+  color: #FFF;
+  justify-content: center;
+  align-items: center;
+}
+canvas {
+  width: 100% !important;
+  height: 100% !important;
+  background-color: #f8f8f8;
+  outline: none;
+}
+a {
+  color: #AAA;
+  text-decoration: none;
+}
+a:hover {
+  color: #42a5f5;
+}
+a:active {
+  color: #1976d2;
+}
+.body > .multibutton {
+  position: absolute;
+  right: 30px;
+  bottom: 30px;
+}
+.multibutton {
+  display: flex;
+}
+.multibutton .button:not(.first) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.multibutton .button:not(.last) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.button {
+  display: inline-flex;
+  margin-right: 5px;
+  padding: 7px 14px;
+  border: 2px solid;
+  border-radius: 100px;
+  color: #5c6bc0;
+  font-size: 13px;
+  cursor: pointer;
+  outline: none
+}
+/* .button:not(:last-child) {
+  margin-right: 20px;
+} */
+.button:not([disabled]):hover {
+  background-color: #5c6bc0;
+  border-color: #5c6bc0;
+  color: #FFF;
+}
+.button[disabled] {
+  color: #b71c1c;
+  cursor: auto;
+}
+#code-header:not(.open),
+#code-button:not(.open) .opened-text,
+#code-button.open .closed-text
+{
+  display: none;
+}
+.coming-soon {
+  color: #ccc;
+}
+.coming-soon-sub {
+  font-size: 10px;
+  display: block;
+}
+.header-link {
+  color: #666;
+}
+.code-header {
+  position: absolute;
+  top: 50px;
+  right: 0;
+  display: flex;
+  align-items: center;
+  width: 600px;
+  height: 32px;
+  padding: 5px;
+  font-size: 13px;
+  color: #4caf50;
+  background-color: #f2f3f5;
+}
+.code {
+  position: absolute;
+  top: 82px;
+  bottom: 0;
+  right: 0;
+  width: 600px;
+  border: 0;
+  border-left: 5px solid #f2f3f5;
+  outline: none;
+}
+.code:not(.open) {
+  display: none;
+}
+input[type=text] {
+  width: 160px;
+  margin: 0 20px;
+  padding: 7px 14px;
+  background-color: #f2f3f5;
+  border: 0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: inherit;
+  outline: none;
+}
+
+/* account.css */
+
+input[type=email],
+input[type=text]
+{
+  margin-right: 10px;
+  padding: 7px 14px;
+  background-color: #f2f3f5;
+  border: 0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: inherit;
+  outline: none;
+}
+
+header > .login-form {
+  display: flex;
+  margin-left: auto;
+}
+
+body.logging-in .login-form,
+header > .login-form:not(.phase-1) > .phase-1-content,
+header > .login-form:not(.phase-2) > .phase-2-content,
+header > .login-form:not(.phase-3) > .phase-3-content,
+header > .login-form.phase-1 > .phaseless-content,
+header > .login-form.phase-2 > .phaseless-content,
+header > .login-form.phase-3 > .phaseless-content
+{
+  display: none;
+}
+
+.login-form .phase-content {
+  display: flex;
+  align-items: center;
+}
+.login-form .phase-content .login-error
+{
+  margin-right: 15px;
+  font-weight: 600;
+}
+.login-form .phase-content .user-button {
+  display: flex;
+  height: 30px;
+  margin-right: 10px;
+  padding: 3px 10px;
+  background-color: #f2f3f5;
+  border: 0;
+  border-radius: 8px;
+  align-items: center;
+  cursor: pointer;
+}
+.login-form .phase-content .user-button:hover,
+.login-form .phase-content .user-button.open {
+  background-color: #CCC;
+}
+.login-form .phase-content .user-button > img {
+  width: 20px;
+  height: 20px;
+  margin-right: 5px;
+}
+.login-form .phase-content .user-button > .name {
+  display: flex;
+  height: 100%;
+  font-weight: 600;
+  align-items: center;
+}
+.login-form .phase-content .login-notice {
+  color: #4caf50;
+}
+.login-form .phase-content .login-error {
+  color: #e53935;
+}
+.login-form .phaseless-content {
+  padding: 0 30px;
+}
+    </style>
+    <script src="three.js"></script>
+    <script src="OrbitControls.js"></script>
+    <script src="Reflector.js"></script>
+  </head>
+  <body>
+    <div class=body>
+      <header>
+        <img src="logo.svg" class="icon">
+        <nav class=selected><span>Avatars</span></nav>
+        <!-- <a href="https://docs.exokit.org/"><nav><span class="header-link">Documentation</span></nav></a>
+        <a href="https://browser.exokit.org"><nav><span class="header-link">Browser
+        </span></nav></a>
+        <a href="https://discord.gg/UgZDFZW"><nav><span class="coming-soon">Exoland
+          <p class="coming-soon-sub">Coming soon!</p>
+        </span></nav></a> -->
+
+        <form class="login-form phase-1" id=login-form>
+          <div class=phase-content>
+            <div class=login-notice id=login-notice></div>
+            <div class=login-error id=login-error></div>
+          </div>
+          <div class="phase-content phase-1-content">
+            <input type=email placeholder="your@email.com" id=login-email>
+            <input type=submit value="Log in" class="button highlight">
+          </div>
+          <div class="phase-content phase-2-content">
+            <input type=text placeholder="Verification code" id=login-verification-code>
+            <input type=submit value="Verify" class="button highlight">
+          </div>
+          <div class="phase-content phase-3-content">
+            <button class=user-button id=user-button>
+              <img src="exobot.png">
+              <span class=name id=login-email-static>a@modules.io</span>
+            </button>
+            <input type=button value="Load avatar" class="button highlight" id=load-avater>
+            <input type=button value="Save avatar" class="button highlight" id=save-avater>
+            <input type=submit value="Log out" class="button highlight">
+          </div>
+          <div class="phase-content phaseless-content">
+            <div>Working...</div>
+          </div>
+        </form>
+      </header>
+
+      <div class=examples>
+        <h3>Examples</h3>
+        <p class=avatar-models id=avatar-models></p>
+        <div class=multibutton>
+          <label for="upload-file-button">
+            <a class="button first last">Upload file...</a>
+            <input type="file" id="upload-file-button" style="display: none">
+          </label>
+        </div>
+        <div class=multibutton>
+          <nav class="button first last" id=export-model-button>Export model</nav>
+        </div>
+        <div class=multibutton>
+          <nav class="button first" id=scale-down-button>Scale -</nav>
+          <nav class="button last" id=scale-up-button>Scale +</nav>
+        </div>
+        <h3>Multiplayer</h3>
+        <input type=text value="avaer/yatis" placeholder="user/channel" id=channel-input>
+        <div class=multibutton>
+          <nav class="button first last" id=connect-button>Connect</nav>
+        </div>
+      </div>
+
+      <div class=iframe-wrapper id=iframe-wrapper></div>
+
+      <div class=multibutton>
+        <a class="button first" id="enable-mic-button" style="display: none;">Enable Mic</a>
+        <a class="button first" id="disable-mic-button" disabled style="display: none;">Disable Mic</a>
+        <a class="button" id="firstperson-button">Firstperson</a>
+        <a class="button" id="thirdperson-button">Thirdperson</a>
+        <a class="button last" id="enter-xr-button" style="display: none;">Enter XR</a>
+        <a class="button last" id="no-xr-button" disabled style="display: none;">No XR</a>
+      </div>
+    </div>
+    <script type=module>
+import './webxr-polyfill.module.js';
+import './HelioWebXRPolyfill.js';
+
+const peerPoseUpdateRate = 50;
+const walkSpeed = 0.0015;
+const floorPlane = new THREE.Plane().setFromNormalAndCoplanarPoint(new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 0));
+
+const localVector = new THREE.Vector3();
+const localVector2 = new THREE.Vector3();
+const localVector3 = new THREE.Vector3();
+const localVector4 = new THREE.Vector3();
+const localVector5 = new THREE.Vector3();
+const localQuaternion = new THREE.Quaternion();
+const localQuaternion2 = new THREE.Quaternion();
+const localMatrix = new THREE.Matrix4();
+const localEuler = new THREE.Euler();
+const localRay = new THREE.Ray();
+
+const scene = new THREE.Scene();
+
+const container = new THREE.Object3D();
+scene.add(container);
+
+const camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.y = 1.5;
+camera.position.z = 2;
+// camera.rotation.y = Math.PI;
+
+const ambientLight = new THREE.AmbientLight(0x808080);
+scene.add(ambientLight);
+
+const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 1);
+directionalLight.position.set(0.5, 1, 0.5);
+scene.add(directionalLight);
+
+/* const directionalLight2 = new THREE.DirectionalLight(0xFFFFFF, 1);
+directionalLight2.position.set(0, -0.25, -0.25);
+scene.add(directionalLight2); */
+
+const gridHelper = new THREE.GridHelper(10, 10);
+container.add(gridHelper);
+
+const renderer = new THREE.WebGLRenderer({
+  // canvas: document.getElementById('canvas'),
+  // alpha: true,
+  antialias: true,
+});
+// console.log('set size', window.innerWidth, window.innerHeight);
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.sortObjects = false;
+document.getElementById('iframe-wrapper').appendChild(renderer.domElement);
+
+const orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
+orbitControls.screenSpacePanning = true;
+orbitControls.enableMiddleZoom = false;
+orbitControls.update();
+
+let session = null;
+const enterXrButton = document.getElementById('enter-xr-button');
+const noXrButton = document.getElementById('no-xr-button');
+enterXrButton.addEventListener('click', async () => {
+  session = await navigator.xr.requestSession('immersive-vr', {
+    requiredFeatures: ['local-floor'],
+  });
+  let referenceSpace;
+  let referenceSpaceType = '';
+  const _loadReferenceSpace = async () => {
+    const lastReferenceSpaceType = referenceSpaceType;
+    try {
+      referenceSpace = await session.requestReferenceSpace('local-floor');
+      referenceSpaceType = 'local-floor';
+    } catch (err) {
+      referenceSpace = await session.requestReferenceSpace('local');
+      referenceSpaceType = 'local';
+    }
+
+    if (referenceSpaceType !== lastReferenceSpaceType) {
+      console.log(`referenceSpace changed to ${referenceSpaceType}`);
+    }
+  };
+  await _loadReferenceSpace();
+  const loadReferenceSpaceInterval = setInterval(_loadReferenceSpace, 1000);
+  
+  await new Promise((accept, reject) => {
+    renderer.vr.setSession(session);
+
+    let interations = 0;
+    const _raf = (timestamp, frame) => {
+      const pose = frame.getViewerPose(referenceSpace);
+      if (pose) {
+        const viewport = session.renderState.baseLayer.getViewport(pose.views[0]);
+        // const width = viewport.width;
+        const height = viewport.height;
+        const fullWidth = (() => {
+          let result = 0;
+          for (let i = 0; i < pose.views.length; i++) {
+            result += session.renderState.baseLayer.getViewport(pose.views[i]).width;
+          }
+          return result;
+        })();
+        renderer.setSize(fullWidth, height);
+        renderer.setPixelRatio(1);
+
+        renderer.setAnimationLoop(null);
+
+        renderer.vr.enabled = true;
+        renderer.vr.setSession(session);
+        renderer.vr.setAnimationLoop(animate);
+
+        accept();
+      } else {
+        interations++;
+        if (iterations > 100) {
+          console.warn('did not receive pose after many frames');
+        }
+        session.requestAnimationFrame(_raf);
+      }
+    };
+    session.requestAnimationFrame(_raf);
+  });
+  console.log('loaded XR');
+});
+
+(async () => {
+  let result;
+  if (navigator.xr) {
+    try {
+      await navigator.xr.supportsSession('immersive-vr');
+      result = true;
+    } catch (err) {
+      console.warn(err);
+      result = false;
+    }
+  } else {
+    result = false;
+  }
+  if (result) {
+    console.log('xr available');
+    enterXrButton.style.display = null;
+  } else {
+    console.log('no xr');
+    noXrButton.style.display = null;
+  }
+
+  /* const microphonePermission = await navigator.permissions.query({
+    name: 'microphone',
+  });
+  if (microphonePermission.state === 'granted') {
+    microphoneMediaStream  = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+    });
+    disableMicButton.style.display = null;
+  } else {
+    enableMicButton.style.display = null;
+  } */
+  enableMicButton.style.display = null;
+
+  const {href} = aAvatars[1];
+  const model = await _loadModelUrl(href);
+  _setLocalModel(model);
+  modelUrl = href;
+  _sendAllPeerConnections(JSON.stringify({
+    method: 'model',
+    url: modelUrl,
+  }));
+})();
+
+let loginToken = null;
+const loginUrl = 'https://login.exokit.org/';
+async function doLogin(email, code) {
+  const res = await fetch(`${loginUrl}?email=${encodeURIComponent(email)}&code=${encodeURIComponent(code)}`, {
+    method: 'POST',
+  });
+  if (res.status >= 200 && res.status < 300) {
+    const newLoginToken = await res.json();
+
+    await storage.set('loginToken', newLoginToken);
+
+    loginToken = newLoginToken;
+
+    // loginNameStatic.innerText = loginToken.name;
+    // loginEmailStatic.innerText = loginToken.email;
+
+    document.body.classList.add('logged-in');
+    loginForm.classList.remove('phase-1');
+    loginForm.classList.remove('phase-2');
+    loginForm.classList.add('phase-3');
+
+    return true;
+  } else {
+    return false;
+  }
+}
+const storage = {
+  async get(k) {
+    const s = localStorage.getItem(k);
+    if (typeof s === 'string') {
+      return JSON.parse(s);
+    } else {
+      return undefined;
+    }
+  },
+  async set(k, v) {
+    localStorage.setItem(k, JSON.stringify(v));
+  },
+  async remove(k) {
+    localStorage.removeItem(k);
+  },
+};
+    </script>
+  </body>
+</html>
