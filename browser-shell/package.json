@@ -1,0 +1,40 @@
+{
+  "name": "browser-shell",
+  "version": "1.0.0",
+  "description": "A Linux command-line shell in the browser",
+  "main": "index.js",
+  "scripts": {
+    "wget-nohost-sw": "wget https://unpkg.com/nohost/dist/nohost-sw.js -O dist/nohost-sw.js",
+    "postwget-nohost-sw": "wget https://unpkg.com/nohost/dist/nohost-sw.map -O dist/nohost-sw.map",
+    "build": "parcel build src/index.html --detailed-report",
+    "postbuild": "npm run wget-nohost-sw",
+    "build-travis": "parcel build src/index.html --public-url /browser-shell/",
+    "postbuild-travis": "npm run wget-nohost-sw",
+    "eslint": "eslint src",
+    "eslint-fix": "eslint src --fix",
+    "test": "npm run eslint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/humphd/browser-shell.git"
+  },
+  "author": "David Humphrey (@humphd)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/humphd/browser-shell/issues"
+  },
+  "homepage": "https://github.com/humphd/browser-shell#readme",
+  "dependencies": {
+    "filer": "^1.1.2",
+    "v86": "github:humphd/v86#filer-9p-lastknowngood",
+    "xterm": "^3.12.2"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-preset-env": "^1.7.0",
+    "drag-drop": "^4.2.0",
+    "eslint": "^5.16.0",
+    "parcel": "^1.12.3",
+    "workbox-window": "^4.2.0"
+  }
+}
