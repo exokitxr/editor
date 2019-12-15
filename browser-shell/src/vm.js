@@ -66,6 +66,7 @@ const resume = module.exports.resume = () => {
 
 // Toggle play/pause power buttons so only 1 is active
 const updatePowerUI = (isPlaying) => {
+  return;
   const termPlay = document.querySelector('#term-play');
   const termPause = document.querySelector('#term-pause');
 

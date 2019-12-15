@@ -43,13 +43,13 @@ module.exports = {
     screen_container: document.getElementById('screen_container'),
     */
     bios: {
-      url: 'bin/seabios.bin',
+      url: 'browser-shell/dist/bin/seabios.bin',
     },
     vga_bios: {
-      url: 'bin/vgabios.bin',
+      url: 'browser-shell/dist/bin/vgabios.bin',
     },
     cdrom: {
-      url: 'bin/v86-linux.iso',
+      url: 'browser-shell/dist/bin/v86-linux.iso',
     },
     // Mouse disabled, undo if you want to interact with the screen
     disable_mouse: true,

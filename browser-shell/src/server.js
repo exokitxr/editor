@@ -36,7 +36,7 @@ function start() {
   }
 
   // Downloaded via package.json script from https://www.npmjs.com/package/nohost?activeTab=versions via unpkg
-  const wb = new Workbox(`nohost-sw.js?route=${encodeURIComponent(fsRoot)}`);
+  const wb = new Workbox(`browser-shell/dist/nohost-sw.js?route=${encodeURIComponent(fsRoot)}`);
 
   // Wait on the server to be fully ready to handle routing requests
   wb.controlling.then(() => {
