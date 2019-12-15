@@ -3,5 +3,5 @@
 const server = require('./server');
 const terminal = require('./terminal');
 
-server.start();
-terminal.start();
+// server.start();
+// terminal.start();

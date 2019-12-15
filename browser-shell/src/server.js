@@ -54,5 +54,8 @@ function start() {
   // Register the service worker after event listeners have been added.
   wb.register();
 }
+window.server = {
+  start,
+};
 
 module.exports.start = start;

@@ -3,9 +3,12 @@
 const { Terminal } = require('xterm');
 const fit = require('xterm/lib/addons/fit/fit');
 Terminal.applyAddon(fit);
+window.Terminal = Terminal;
 
 const { molokaiTheme } = require('./config');
+window.molokaiTheme = molokaiTheme;
 const vm = require('./vm');
+window.vm = vm;
 
 function createTerm() {
   const term = (window.term = new Terminal({ theme: molokaiTheme }));

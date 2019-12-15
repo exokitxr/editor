@@ -17,7 +17,7 @@ console.info('use ?debug on the URL if you need Plan9/Filer debug info from v86'
 /**
  * Setup drop zone for adding files
  */
-window.addEventListener('DOMContentLoaded', function() {
+/* window.addEventListener('DOMContentLoaded', function() {
   const dropTarget = document.querySelector('#drag-drop');
 
   dragDrop(dropTarget, function (files) {
@@ -53,7 +53,7 @@ window.addEventListener('DOMContentLoaded', function() {
       reader.readAsArrayBuffer(file);
     });
   });  
-});
+}); */
 
 /**
  * Put some files in the filesystem on the first run
