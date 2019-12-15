@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start": "sudo $(which node) index.js",
-    "build": "cd menu && react-scripts build",
+    "build": "parcel build --target browser ./browser-shell/src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
