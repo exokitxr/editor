@@ -36,5 +36,8 @@
     "eslint": "^5.16.0",
     "parcel": "^1.12.3",
     "workbox-window": "^4.2.0"
-  }
+  },
+  "browserslist": [
+    "last 1 Chrome version"
+  ]
 }
