@@ -578,7 +578,7 @@ editor.addEventListener('textchanged', e => {
 });
 editor.language = new Textor.JavaScriptLanguage();
 editor.theme = editor.themeManager.get("dark");
-editor.focus();
+// editor.focus();
 // editor.text = document.querySelector("#data").textContent;
 // window.editor = editor;
 
@@ -622,7 +622,8 @@ editorPlaneMesh.position.x = 1.5;
 editorPlaneMesh.position.y = 1;
 editorPlaneMesh.quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), -Math.PI/4);
 editorPlaneMesh.click = () => {
-  console.log('click 2');
+  // console.log('click 2');
+  editor.focus();
 };
 scene.add(editorPlaneMesh);
 
@@ -642,7 +643,7 @@ raycastMesh.frustumCulled = false;
 scene.add(raycastMesh);
 
 let hoverObject = null;
-window.addEventListener('mousemove', e => {
+renderer.domElement.addEventListener('mousemove', e => {
   // const position = new THREE.Vector3();
   const rect = renderer.domElement.getBoundingClientRect();
   const xFactor = (e.clientX - rect.left) / rect.width;
