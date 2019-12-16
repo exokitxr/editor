@@ -297,6 +297,7 @@ editor.text = `\
       renderer.vr.setSession(session);
 
       function animate() {
+        cubeMesh.position.y = Math.sin((Date.now()%5000)/5000 * Math.PI*2);
         renderer.render(scene, camera);
       }
       renderer.vr.setAnimationLoop(animate);
