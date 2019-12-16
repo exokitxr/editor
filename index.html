@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
   <head>
-    <link rel="stylesheet" href="browser-shell/dist/xterm.css">
+    <!-- <link rel="stylesheet" href="browser-shell/dist/xterm.css"> -->
     <style>
 * {
   box-sizing: border-box;
@@ -92,27 +92,11 @@ li {
   flex: 1;
   background-color: #FFF;
 }
-.iframe-wrapper canvas,
-.iframe-wrapper #terminal
-{
-  position: absolute;
-}
-.iframe-wrapper #canvas {
-}
 /* .xterm-selection-layer,
 .xterm-link-layer
 {
    display: none;
 } */
-.xterm-selection-layer,
-.xterm-link-layer,
-.xterm-cursor-layer
-{
-  /* width: 1px !important;
-  height: 1px !important;
-  pointer-events: none; */
-  visibility: hidden;
-}
 .tabs {
   position: absolute;
   top: 0;
@@ -326,12 +310,12 @@ header > .login-form.phase-3 > .phaseless-content
   padding: 0 30px;
 }
     </style>
-    <script src="three.js"></script>
+    <!-- <script src="three.js"></script>
     <script src="OrbitControls.js"></script>
     <script src="Reflector.js"></script>
     <script src="dist/index.js"></script>
     <script src="textor/dist/texteditor.js"></script>
-    <script src="textor/dist/javascript.js"></script>
+    <script src="textor/dist/javascript.js"></script> -->
   </head>
   <body>
     <div class=body>
@@ -373,10 +357,7 @@ header > .login-form.phase-3 > .phaseless-content
         </form>
       </header>
 
-      <div class=iframe-wrapper id=iframe-wrapper>
-        <div id=terminal></div>
-        <canvas id=editor></canvas>
-      </div>
+      <div class=iframe-wrapper id=iframe-wrapper></div>
 
       <div class=multibutton>
         <a class="button first last" id="enter-xr-button" style="display: none;">Enter XR</a>
@@ -384,137 +365,19 @@ header > .login-form.phase-3 > .phaseless-content
       </div>
     </div>
     <script type=module>
-import './webxr-polyfill.module.js';
-import './HelioWebXRPolyfill.js';
+// import './webxr-polyfill.module.js';
+// import './HelioWebXRPolyfill.js';
+import ew from 'https://web2.exokit.org/ew.js';
+// import ew from './exokit-web/ew.js';
 
-const peerPoseUpdateRate = 50;
-const walkSpeed = 0.0015;
-const floorPlane = new THREE.Plane().setFromNormalAndCoplanarPoint(new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 0));
-
-const localVector = new THREE.Vector3();
-const localVector2 = new THREE.Vector3();
-const localVector3 = new THREE.Vector3();
-const localVector4 = new THREE.Vector3();
-const localVector5 = new THREE.Vector3();
-const localVector2D = new THREE.Vector2();
-const localQuaternion = new THREE.Quaternion();
-const localQuaternion2 = new THREE.Quaternion();
-const localMatrix = new THREE.Matrix4();
-const localEuler = new THREE.Euler();
-const localRaycaster = new THREE.Raycaster();
-
-const scene = new THREE.Scene();
-
-const container = new THREE.Object3D();
-scene.add(container);
-
-const camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.y = 1.5;
-camera.position.z = 2;
-// camera.rotation.y = Math.PI;
-
-const ambientLight = new THREE.AmbientLight(0x808080);
-scene.add(ambientLight);
-
-const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 1);
-directionalLight.position.set(0.5, 1, 0.5);
-scene.add(directionalLight);
-
-/* const directionalLight2 = new THREE.DirectionalLight(0xFFFFFF, 1);
-directionalLight2.position.set(0, -0.25, -0.25);
-scene.add(directionalLight2); */
-
-const gridHelper = new THREE.GridHelper(10, 10);
-container.add(gridHelper);
-
-const renderer = new THREE.WebGLRenderer({
-  // canvas: document.getElementById('canvas'),
-  // alpha: true,
-  antialias: true,
-});
-// console.log('set size', window.innerWidth, window.innerHeight);
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(window.devicePixelRatio);
-renderer.sortObjects = false;
-renderer.domElement.id = 'canvas';
-document.getElementById('iframe-wrapper').appendChild(renderer.domElement);
-
-const orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
-orbitControls.screenSpacePanning = true;
-orbitControls.enableMiddleZoom = false;
-orbitControls.update();
-
-let session = null;
-const enterXrButton = document.getElementById('enter-xr-button');
-const noXrButton = document.getElementById('no-xr-button');
-enterXrButton.addEventListener('click', async () => {
-  session = await navigator.xr.requestSession('immersive-vr', {
-    requiredFeatures: ['local-floor'],
-  });
-  let referenceSpace;
-  let referenceSpaceType = '';
-  const _loadReferenceSpace = async () => {
-    const lastReferenceSpaceType = referenceSpaceType;
-    try {
-      referenceSpace = await session.requestReferenceSpace('local-floor');
-      referenceSpaceType = 'local-floor';
-    } catch (err) {
-      referenceSpace = await session.requestReferenceSpace('local');
-      referenceSpaceType = 'local';
-    }
-
-    if (referenceSpaceType !== lastReferenceSpaceType) {
-      console.log(`referenceSpace changed to ${referenceSpaceType}`);
-    }
-  };
-  await _loadReferenceSpace();
-  const loadReferenceSpaceInterval = setInterval(_loadReferenceSpace, 1000);
-  
-  await new Promise((accept, reject) => {
-    renderer.vr.setSession(session);
-
-    let interations = 0;
-    const _raf = (timestamp, frame) => {
-      const pose = frame.getViewerPose(referenceSpace);
-      if (pose) {
-        const viewport = session.renderState.baseLayer.getViewport(pose.views[0]);
-        // const width = viewport.width;
-        const height = viewport.height;
-        const fullWidth = (() => {
-          let result = 0;
-          for (let i = 0; i < pose.views.length; i++) {
-            result += session.renderState.baseLayer.getViewport(pose.views[i]).width;
-          }
-          return result;
-        })();
-        renderer.setSize(fullWidth, height);
-        renderer.setPixelRatio(1);
-
-        renderer.setAnimationLoop(null);
-
-        renderer.vr.enabled = true;
-        renderer.vr.setSession(session);
-        renderer.vr.setAnimationLoop(animate);
-
-        accept();
-      } else {
-        interations++;
-        if (iterations > 100) {
-          console.warn('did not receive pose after many frames');
-        }
-        session.requestAnimationFrame(_raf);
-      }
-    };
-    session.requestAnimationFrame(_raf);
-  });
-  console.log('loaded XR');
-});
-
+let xrEngine = null;
 (async () => {
+  const enterXrButton = document.getElementById('enter-xr-button');
+  const noXrButton = document.getElementById('no-xr-button');
   let result;
   if (navigator.xr) {
     try {
-      await navigator.xr.supportsSession('immersive-vr');
+      await navigator.xr.isSessionSupported('immersive-vr');
       result = true;
     } catch (err) {
       console.warn(err);
@@ -530,154 +393,34 @@ enterXrButton.addEventListener('click', async () => {
     console.log('no xr');
     noXrButton.style.display = null;
   }
-})();
 
-let loginToken = null;
-const loginUrl = 'https://login.exokit.org/';
-async function doLogin(email, code) {
-  const res = await fetch(`${loginUrl}?email=${encodeURIComponent(email)}&code=${encodeURIComponent(code)}`, {
-    method: 'POST',
-  });
-  if (res.status >= 200 && res.status < 300) {
-    const newLoginToken = await res.json();
+  await ew.register();
 
-    await storage.set('loginToken', newLoginToken);
-
-    loginToken = newLoginToken;
-
-    // loginNameStatic.innerText = loginToken.name;
-    // loginEmailStatic.innerText = loginToken.email;
-
-    document.body.classList.add('logged-in');
-    loginForm.classList.remove('phase-1');
-    loginForm.classList.remove('phase-2');
-    loginForm.classList.add('phase-3');
-
-    return true;
-  } else {
-    return false;
-  }
-}
-
-// boot
-
-server.start();
-
-const term = (window.term = new Terminal({
-  theme: molokaiTheme,
-}));
-const terminalEl = document.getElementById('terminal');
-term.open(terminalEl);
-// term.fit();
-vm.boot(term);
-// window.term = term;
-
-const editor = new Textor.TextEditor(document.getElementById("editor"));
-editor.addEventListener('textchanged', e => {
-  console.log('text changed', e);
-});
-editor.language = new Textor.JavaScriptLanguage();
-editor.theme = editor.themeManager.get("dark");
-// editor.focus();
-// editor.text = document.querySelector("#data").textContent;
-// window.editor = editor;
-
-const xtermTextLayerEl = document.querySelector('.xterm-text-layer');
-const planeGeometry = new THREE.PlaneBufferGeometry(2, 1);
-const xtermPlaneMesh = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial({
-  map: new THREE.Texture(
-    xtermTextLayerEl,
-    THREE.UVMapping,
-    THREE.ClampToEdgeWrapping,
-    THREE.ClampToEdgeWrapping,
-    THREE.LinearFilter,
-    THREE.LinearFilter // use mipmapping in webgl2
-  ),
-}));
-xtermPlaneMesh.position.x = -1.5;
-xtermPlaneMesh.position.y = 1;
-xtermPlaneMesh.quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI/4);
-xtermPlaneMesh.click = () => {
-  console.log('click 1', new Error().stack);
-  term.focus();
-  /* setTimeout(() => {
-    document.querySelector('.xterm-text-layer').click();
-    document.querySelector('.xterm-text-layer').focus();
+  xrEngine = new XREngine();
+  xrEngine.src = 'app.html';
+  /* xrEngine.addEventListener('message', async e => {
+    const {data} = e;
+    const {method} = data;
   }); */
-};
-scene.add(xtermPlaneMesh);
+  const iframeWrapper = document.getElementById('iframe-wrapper');
+  iframeWrapper.appendChild(xrEngine);
 
-const editorEl = document.getElementById('editor');
-const editorPlaneMesh = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial({
-  map: new THREE.Texture(
-    editorEl,
-    THREE.UVMapping,
-    THREE.ClampToEdgeWrapping,
-    THREE.ClampToEdgeWrapping,
-    THREE.LinearFilter,
-    THREE.LinearFilter // use mipmapping in webgl2
-  ),
-}));
-editorPlaneMesh.position.x = 1.5;
-editorPlaneMesh.position.y = 1;
-editorPlaneMesh.quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), -Math.PI/4);
-editorPlaneMesh.click = () => {
-  // console.log('click 2');
-  editor.focus();
-};
-scene.add(editorPlaneMesh);
+  xrEngine.addEventListener('canvas', e => {
+    /* const canvas = e.data;
+    console.log('got canvas', canvas);
 
-function animate() {
-  // console.log('needs update', xtermPlaneMesh.material.map.image);
-  xtermPlaneMesh.material.map.needsUpdate = true;
-  editorPlaneMesh.material.map.needsUpdate = true;
+    document.body.appendChild(canvas); */
 
-  renderer.render(scene, camera);
-}
-renderer.setAnimationLoop(animate);
-
-const raycastMesh = new THREE.Mesh(new THREE.BoxBufferGeometry(0.1, 0.1, 0.1), new THREE.MeshPhongMaterial({
-  color: 0xFF0000,
-}));
-raycastMesh.frustumCulled = false;
-scene.add(raycastMesh);
-
-let hoverObject = null;
-renderer.domElement.addEventListener('mousemove', e => {
-  // const position = new THREE.Vector3();
-  const rect = renderer.domElement.getBoundingClientRect();
-  const xFactor = (e.clientX - rect.left) / rect.width;
-  const yFactor = -(e.clientY - rect.top) / rect.height;
-  if (xFactor >= 0 && xFactor <= 1 && -yFactor >= 0 && -yFactor <= 1) {
-    /* const plane = new THREE.Plane().setFromNormalAndCoplanarPoint(
-      new THREE.Vector3(0, 0, 1).applyQuaternion(camera.quaternion),
-      camera.position.clone()
-        .add(new THREE.Vector3(0, 0, -3).applyQuaternion(camera.quaternion))
-    ); */
-    localRaycaster.setFromCamera(localVector2D.set(xFactor * 2 - 1, yFactor * 2 + 1), camera);
-    const intersections = localRaycaster.intersectObjects([
-      xtermPlaneMesh,
-      editorPlaneMesh,
-    ]);
-    if (intersections.length > 0) {
-      const [intersection] = intersections;
-      // console.log('got intersection', intersections[0]);
-      // intersection.divide(container.scale);
-      raycastMesh.position.copy(intersection.point);
-      hoverObject = intersection.object;
-    } else {
-      hoverObject = null;
-    }
-  }
-});
-renderer.domElement.addEventListener('click', e => {
-  // console.log('click', hoverObject);
-  if (hoverObject) {
-    hoverObject.click();
-  } else {
-    document.activeElement.blur();
-  }
-});
+    [
+      'enter-xr-button',
+    ].forEach(id => {
+      const el = document.getElementById(id);
+      el.addEventListener('click', async () => {
+        await xrEngine.enterXr();
+      });
+    });
+  });
+})();
     </script>
   </body>
 </html>
