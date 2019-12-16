@@ -305,15 +305,21 @@ editor.text = `\
   </script>
 </xr-site>
 `;
-/* editor._textController._textArea.addEventListener('focus', () => {
-  // nothing
-}); */
-editor._textController._textArea.addEventListener('blur', e => {
+let lastTextUrl = null;
+editor._textController._textArea.addEventListener('blur', () => {
   if (textChanged) {
-    xrIframe.src = `data:text/html,${editor.text}`;
+    if (lastTextUrl) {
+      URL.revokeObjectURL(lastTextUrl);
+    }
+    lastTextUrl = URL.createObjectURL(new Blob([editor.text], {
+      type: 'text/html',
+    }));
+    xrIframe.src = lastTextUrl;
+    // xrIframe.src = 'data:text/html,' + editor.text;
     textChanged = false;
   }
 });
+editor._textController._textArea.dispatchEvent(new CustomEvent('blur'));
 
 const width = 2;
 const height = 1;
