@@ -271,11 +271,6 @@ let textChanged = false;
 editor.addEventListener('textchanged', () => {
   textChanged = true;
 });
-{
-  const boundingRect = editorEl.getBoundingClientRect();
-  console.log('get bounding rect', boundingRect);
-  editor.updateSize(boundingRect.width/2, boundingRect.height);
-}
 /* editor.addEventListener('focus', () => {
   console.log('got focus');
 });
@@ -330,10 +325,8 @@ editor._textController._textArea.addEventListener('blur', () => {
 });
 editor._textController._textArea.dispatchEvent(new CustomEvent('blur'));
 
-const width = 2;
-const height = 1;
 const rayDistance = 10;
-const planeGeometry = new THREE.PlaneBufferGeometry(width, height);
+// const planeGeometry = new THREE.PlaneBufferGeometry(width, height);
 /* const xtermTextLayerEl = document.querySelector('.xterm-text-layer');
 const xtermPlaneMesh = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial({
   map: new THREE.Texture(
@@ -355,7 +348,7 @@ xtermPlaneMesh.click = () => {
 scene.add(xtermPlaneMesh); */
 
 const editorPlaneMesh = (() => {
-  const mesh = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial({
+  const mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(1, 1), new THREE.MeshBasicMaterial({
     map: new THREE.Texture(
       editorEl,
       THREE.UVMapping,
@@ -378,24 +371,22 @@ const editorPlaneMesh = (() => {
     }));
     // editor.focus();
   };
-  mesh.width = width;
-  mesh.height = height;
   mesh.plane = new THREE.Plane();
   mesh.leftLine = new THREE.Line3();
   mesh.topLine = new THREE.Line3();
   mesh.update = e => {
     mesh.leftLine.start
-      .set(-width/2, height/2, 0)
+      .set(-1/2, 1/2, 0)
       .applyMatrix4(mesh.matrixWorld);
     mesh.leftLine.end
-      .set(-width/2, -height/2, 0)
+      .set(-1/2, -1/2, 0)
       .applyMatrix4(mesh.matrixWorld);
 
     mesh.topLine.start
-      .set(-width/2, height/2, 0)
+      .set(-1/2, 1/2, 0)
       .applyMatrix4(mesh.matrixWorld);
     mesh.topLine.end
-      .set(width/2, height / 2, 0)
+      .set(1/2, 1 / 2, 0)
       .applyMatrix4(mesh.matrixWorld);
 
     mesh.plane.setFromCoplanarPoints(
@@ -407,6 +398,17 @@ const editorPlaneMesh = (() => {
   return mesh;
 })();
 scene.add(editorPlaneMesh);
+
+const _updateEditorSize = () => {
+  const editorWidth = window.top.innerWidth/2;
+  const editorHeight = window.top.innerHeight-50;
+  editor.updateSize(editorWidth, editorHeight);
+
+  editorPlaneMesh.scale.x = 2;
+  editorPlaneMesh.scale.y = editorPlaneMesh.scale.x*editorHeight/editorWidth;
+};
+_updateEditorSize();
+window.addEventListener('resize', _updateEditorSize);
 
 let fakeXrDisplay = null;
 function animate() {
@@ -466,8 +468,8 @@ renderer.domElement.addEventListener('mousemove', e => {
       const leftIntersectionPoint = editorPlaneMesh.leftLine.closestPointToPoint(intersectionPoint, true, localVector2);
       const topIntersectionPoint = editorPlaneMesh.topLine.closestPointToPoint(intersectionPoint, true, localVector3);
 
-      const xFactor = topIntersectionPoint.distanceTo(editorPlaneMesh.topLine.start) / editorPlaneMesh.width;
-      const yFactor = leftIntersectionPoint.distanceTo(editorPlaneMesh.leftLine.start) / editorPlaneMesh.height;
+      const xFactor = topIntersectionPoint.distanceTo(editorPlaneMesh.topLine.start) / editorPlaneMesh.scale.x;
+      const yFactor = leftIntersectionPoint.distanceTo(editorPlaneMesh.leftLine.start) / editorPlaneMesh.scale.y;
       const distance = localRaycaster.ray.origin.distanceTo(intersectionPoint);
 
       if (xFactor > 0 && xFactor < 0.99999 && yFactor > 0 && yFactor < 0.99999 && distance < rayDistance) {
