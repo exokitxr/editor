@@ -398,10 +398,11 @@ xrSite.requestSession().then(session => {
   camera.projectionMatrix.toArray(fakeXrDisplay.projectionMatrix);
 });
 
-const raycastMesh = new THREE.Mesh(new THREE.BoxBufferGeometry(0.1, 0.1, 0.1), new THREE.MeshPhongMaterial({
-  color: 0xFF0000,
+const raycastMesh = new THREE.Mesh(new THREE.BoxBufferGeometry(0.02, 0.02, 0.02), new THREE.MeshPhongMaterial({
+  color: 0x29b6f6,
 }));
 raycastMesh.frustumCulled = false;
+raycastMesh.visible = false;
 scene.add(raycastMesh);
 
 let intersection = null;
@@ -439,7 +440,13 @@ renderer.domElement.addEventListener('mousemove', e => {
           x,
           y,
         };
+        raycastMesh.position.copy(intersectionPoint);
+        raycastMesh.visible = true;
+      } else {
+        raycastMesh.visible = false;
       }
+    } else {
+      raycastMesh.visible = false;
     }
   }
 });
