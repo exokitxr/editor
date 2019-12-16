@@ -400,18 +400,24 @@ const editorPlaneMesh = (() => {
 })();
 scene.add(editorPlaneMesh);
 
-const _updateEditorSize = () => {
+let fakeXrDisplay = null;
+const _updateSize = () => {
   const editorWidth = window.top.innerWidth/2;
   const editorHeight = window.top.innerHeight-50;
   editor.updateSize(editorWidth, editorHeight);
 
   editorPlaneMesh.scale.x = 2;
-  editorPlaneMesh.scale.y = editorPlaneMesh.scale.x*editorHeight/editorWidth;
-};
-_updateEditorSize();
-window.addEventListener('resize', _updateEditorSize);
+  editorPlaneMesh.scale.y = editorHeight/editorWidth;
 
-let fakeXrDisplay = null;
+  if (fakeXrDisplay) {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    camera.projectionMatrix.toArray(fakeXrDisplay.projectionMatrix);
+  }
+};
+_updateSize();
+window.addEventListener('resize', _updateSize);
+
 function animate() {
   // console.log('needs update', xtermPlaneMesh.material.map.image);
   // xtermPlaneMesh.material.map.needsUpdate = true;
