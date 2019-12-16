@@ -54,7 +54,7 @@ const renderer = new THREE.WebGLRenderer({
   antialias: true,
 });
 // console.log('set size', window.innerWidth, window.innerHeight);
-renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setSize(window.innerWidth/2, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.sortObjects = false;
 // renderer.domElement.id = 'canvas';
