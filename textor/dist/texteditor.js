@@ -672,8 +672,8 @@ var Textor;
                 else {
                     this._textEditor.selectTo(position.line, position.column);
                 }
-                this._mouseCapture = true;
-                this.startScrollTimer();
+                // this._mouseCapture = true;
+                // this.startScrollTimer();
             }
             else if (clicks === 2) {
                 // select word at position
