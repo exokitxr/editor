@@ -661,10 +661,9 @@ var Textor;
         TextController.prototype.canvas_mouseDown = function (e) {
             this._textEditor.focus();
             this.stopEvent(e);
-            this.updatePointerPosition(e.pageX, e.pageY);
+            this.updatePointerPosition(e.pageX, e.pageY, e.isTrusted);
             var position = this.getTextPosition();
-            this._textEditor.selectTo(position.line, position.column);
-            var clicks = 1;//((e.detail - 1) % 3) + 1;
+            var clicks = e.isTrusted ? ((e.detail - 1) % 3) + 1 : 1;
             if (clicks === 1) {
                 if (!e.shiftKey) {
                     this.pointerDown();
@@ -672,8 +671,10 @@ var Textor;
                 else {
                     this._textEditor.selectTo(position.line, position.column);
                 }
-                // this._mouseCapture = true;
-                // this.startScrollTimer();
+                if (e.isTrusted) {
+                    this._mouseCapture = true;
+                    this.startScrollTimer();
+                }
             }
             else if (clicks === 2) {
                 // select word at position
@@ -687,15 +688,15 @@ var Textor;
             this.updateMouseCursor();
         };
         TextController.prototype.window_mouseUp = function (e) {
-            return;
+            if (!e.isTrusted) return;
             e.preventDefault();
-            this.updatePointerPosition(e.pageX, e.pageY);
+            this.updatePointerPosition(e.pageX, e.pageY, e.isTrusted);
             this.pointerUp();
         };
         TextController.prototype.window_mouseMove = function (e) {
-            return;
+            if (!e.isTrusted) return;
             e.preventDefault();
-            this.updatePointerPosition(e.pageX, e.pageY);
+            this.updatePointerPosition(e.pageX, e.pageY, e.isTrusted);
             this.pointerMove();
         };
         TextController.prototype.canvas_mouseWheel = function (e) {
@@ -719,14 +720,14 @@ var Textor;
             this._textEditor.focus();
             if (e.touches.length === 1) {
                 e.preventDefault();
-                this.updatePointerPosition(e.touches[0].pageX, e.touches[0].pageY);
+                this.updatePointerPosition(e.touches[0].pageX, e.touches[0].pageY, e.isTrusted);
                 this.pointerDown();
             }
         };
         TextController.prototype.canvas_touchMove = function (e) {
             if (e.touches.length === 1) {
                 e.preventDefault();
-                this.updatePointerPosition(e.touches[0].pageX, e.touches[0].pageY);
+                this.updatePointerPosition(e.touches[0].pageX, e.touches[0].pageY, e.isTrusted);
                 this.pointerMove();
             }
         };
@@ -824,15 +825,17 @@ var Textor;
         TextController.prototype.updateMouseCursor = function () {
             this._canvas.style.cursor = "text";
         };
-        TextController.prototype.updatePointerPosition = function (x, y) {
+        TextController.prototype.updatePointerPosition = function (x, y, isTrusted) {
             var devicePixelRatio = this._textEditor.devicePixelRatio;
             this._pointerPosition = new Textor.Point(x * devicePixelRatio, y * devicePixelRatio);
-            /* var node = this._canvas;
-            while (node !== null) {
-                this._pointerPosition.x -= node.offsetLeft * devicePixelRatio;
-                this._pointerPosition.y -= node.offsetTop * devicePixelRatio;
-                node = node.offsetParent;
-            } */
+            if (isTrusted) {
+                var node = this._canvas;
+                while (node !== null) {
+                    this._pointerPosition.x -= node.offsetLeft * devicePixelRatio;
+                    this._pointerPosition.y -= node.offsetTop * devicePixelRatio;
+                    node = node.offsetParent;
+                }
+            }
         };
         TextController.prototype.getTextCoordinate = function () {
             var x = this._pointerPosition.x + (this._textEditor.fontSize.width / 2);
