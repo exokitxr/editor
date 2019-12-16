@@ -357,6 +357,7 @@ const editorPlaneMesh = (() => {
       THREE.LinearFilter,
       THREE.LinearFilter // use mipmapping in webgl2
     ),
+    side: THREE.DoubleSide,
   }));
   // mesh.position.x = 1.5;
   mesh.position.y = 1;
