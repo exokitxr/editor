@@ -6,6 +6,8 @@ import './textor/dist/javascript.js';
 // import './webxr-polyfill.module.js';
 // import './HelioWebXRPolyfill.js';
 
+const topDocument = window.top.document;
+
 const peerPoseUpdateRate = 50;
 const walkSpeed = 0.0015;
 const floorPlane = new THREE.Plane().setFromNormalAndCoplanarPoint(new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 0));
@@ -261,18 +263,25 @@ const xrIframe = document.createElement('xr-iframe');
 document.body.appendChild(xrIframe);
 
 const editorEl = document.createElement('canvas');
-iframeWrapper.appendChild(editorEl);
+editorEl.id = 'editor';
+// iframeWrapper.appendChild(editorEl);
+topDocument.querySelector('.iframe-wrapper').appendChild(editorEl);
 const editor = new Textor.TextEditor(editorEl);
 let textChanged = false;
 editor.addEventListener('textchanged', () => {
   textChanged = true;
 });
-editor.addEventListener('focus', () => {
+{
+  const boundingRect = editorEl.getBoundingClientRect();
+  console.log('get bounding rect', boundingRect);
+  editor.updateSize(boundingRect.width/2, boundingRect.height);
+}
+/* editor.addEventListener('focus', () => {
   console.log('got focus');
 });
 editor.addEventListener('blur', () => {
   console.log('got blur');
-});
+}); */
 editor.language = new Textor.JavaScriptLanguage();
 editor.theme = editor.themeManager.get("dark");
 editor.text = `\
