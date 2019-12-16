@@ -96,10 +96,22 @@ li {
 .iframe-wrapper #terminal
 {
   position: absolute;
-  visibility: hidden;
 }
 .iframe-wrapper #canvas {
-  visibility: visible;
+}
+/* .xterm-selection-layer,
+.xterm-link-layer
+{
+   display: none;
+} */
+.xterm-selection-layer,
+.xterm-link-layer,
+.xterm-cursor-layer
+{
+  /* width: 1px !important;
+  height: 1px !important;
+  pointer-events: none; */
+  visibility: hidden;
 }
 .tabs {
   position: absolute;
@@ -384,11 +396,12 @@ const localVector2 = new THREE.Vector3();
 const localVector3 = new THREE.Vector3();
 const localVector4 = new THREE.Vector3();
 const localVector5 = new THREE.Vector3();
+const localVector2D = new THREE.Vector2();
 const localQuaternion = new THREE.Quaternion();
 const localQuaternion2 = new THREE.Quaternion();
 const localMatrix = new THREE.Matrix4();
 const localEuler = new THREE.Euler();
-const localRay = new THREE.Ray();
+const localRaycaster = new THREE.Raycaster();
 
 const scene = new THREE.Scene();
 
@@ -553,10 +566,11 @@ server.start();
 const term = (window.term = new Terminal({
   theme: molokaiTheme,
 }));
-term.open(document.getElementById('terminal'));
+const terminalEl = document.getElementById('terminal');
+term.open(terminalEl);
 // term.fit();
 vm.boot(term);
-window.term = term;
+// window.term = term;
 
 const editor = new Textor.TextEditor(document.getElementById("editor"));
 editor.addEventListener('textchanged', e => {
@@ -566,7 +580,7 @@ editor.language = new Textor.JavaScriptLanguage();
 editor.theme = editor.themeManager.get("dark");
 editor.focus();
 // editor.text = document.querySelector("#data").textContent;
-window.editor = editor;
+// window.editor = editor;
 
 const xtermTextLayerEl = document.querySelector('.xterm-text-layer');
 const planeGeometry = new THREE.PlaneBufferGeometry(2, 1);
@@ -583,6 +597,14 @@ const xtermPlaneMesh = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial
 xtermPlaneMesh.position.x = -1.5;
 xtermPlaneMesh.position.y = 1;
 xtermPlaneMesh.quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI/4);
+xtermPlaneMesh.click = () => {
+  console.log('click 1', new Error().stack);
+  term.focus();
+  /* setTimeout(() => {
+    document.querySelector('.xterm-text-layer').click();
+    document.querySelector('.xterm-text-layer').focus();
+  }); */
+};
 scene.add(xtermPlaneMesh);
 
 const editorEl = document.getElementById('editor');
@@ -599,6 +621,9 @@ const editorPlaneMesh = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMateria
 editorPlaneMesh.position.x = 1.5;
 editorPlaneMesh.position.y = 1;
 editorPlaneMesh.quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), -Math.PI/4);
+editorPlaneMesh.click = () => {
+  console.log('click 2');
+};
 scene.add(editorPlaneMesh);
 
 function animate() {
@@ -609,6 +634,49 @@ function animate() {
   renderer.render(scene, camera);
 }
 renderer.setAnimationLoop(animate);
+
+const raycastMesh = new THREE.Mesh(new THREE.BoxBufferGeometry(0.1, 0.1, 0.1), new THREE.MeshPhongMaterial({
+  color: 0xFF0000,
+}));
+raycastMesh.frustumCulled = false;
+scene.add(raycastMesh);
+
+let hoverObject = null;
+window.addEventListener('mousemove', e => {
+  // const position = new THREE.Vector3();
+  const rect = renderer.domElement.getBoundingClientRect();
+  const xFactor = (e.clientX - rect.left) / rect.width;
+  const yFactor = -(e.clientY - rect.top) / rect.height;
+  if (xFactor >= 0 && xFactor <= 1 && -yFactor >= 0 && -yFactor <= 1) {
+    /* const plane = new THREE.Plane().setFromNormalAndCoplanarPoint(
+      new THREE.Vector3(0, 0, 1).applyQuaternion(camera.quaternion),
+      camera.position.clone()
+        .add(new THREE.Vector3(0, 0, -3).applyQuaternion(camera.quaternion))
+    ); */
+    localRaycaster.setFromCamera(localVector2D.set(xFactor * 2 - 1, yFactor * 2 + 1), camera);
+    const intersections = localRaycaster.intersectObjects([
+      xtermPlaneMesh,
+      editorPlaneMesh,
+    ]);
+    if (intersections.length > 0) {
+      const [intersection] = intersections;
+      // console.log('got intersection', intersections[0]);
+      // intersection.divide(container.scale);
+      raycastMesh.position.copy(intersection.point);
+      hoverObject = intersection.object;
+    } else {
+      hoverObject = null;
+    }
+  }
+});
+renderer.domElement.addEventListener('click', e => {
+  // console.log('click', hoverObject);
+  if (hoverObject) {
+    hoverObject.click();
+  } else {
+    document.activeElement.blur();
+  }
+});
     </script>
   </body>
 </html>
