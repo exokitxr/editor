@@ -663,7 +663,8 @@ var Textor;
             this.stopEvent(e);
             this.updatePointerPosition(e.pageX, e.pageY);
             var position = this.getTextPosition();
-            var clicks = ((e.detail - 1) % 3) + 1;
+            this._textEditor.selectTo(position.line, position.column);
+            var clicks = 1;//((e.detail - 1) % 3) + 1;
             if (clicks === 1) {
                 if (!e.shiftKey) {
                     this.pointerDown();
@@ -686,11 +687,13 @@ var Textor;
             this.updateMouseCursor();
         };
         TextController.prototype.window_mouseUp = function (e) {
+            return;
             e.preventDefault();
             this.updatePointerPosition(e.pageX, e.pageY);
             this.pointerUp();
         };
         TextController.prototype.window_mouseMove = function (e) {
+            return;
             e.preventDefault();
             this.updatePointerPosition(e.pageX, e.pageY);
             this.pointerMove();
@@ -824,12 +827,12 @@ var Textor;
         TextController.prototype.updatePointerPosition = function (x, y) {
             var devicePixelRatio = this._textEditor.devicePixelRatio;
             this._pointerPosition = new Textor.Point(x * devicePixelRatio, y * devicePixelRatio);
-            var node = this._canvas;
+            /* var node = this._canvas;
             while (node !== null) {
                 this._pointerPosition.x -= node.offsetLeft * devicePixelRatio;
                 this._pointerPosition.y -= node.offsetTop * devicePixelRatio;
                 node = node.offsetParent;
-            }
+            } */
         };
         TextController.prototype.getTextCoordinate = function () {
             var x = this._pointerPosition.x + (this._textEditor.fontSize.width / 2);
@@ -2258,4 +2261,5 @@ var Textor;
     }());
     Textor.UndoService = UndoService;
 })(Textor || (Textor = {}));
+export default Textor;
 //# sourceMappingURL=texteditor.js.map

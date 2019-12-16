@@ -1,4 +1,4 @@
-var Textor;
+import Textor from './texteditor.js';
 (function (Textor) {
     var JavaScriptLanguage = /** @class */ (function () {
         function JavaScriptLanguage() {
