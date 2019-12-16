@@ -422,7 +422,6 @@ renderer.domElement.addEventListener('mousemove', e => {
     localRaycaster.setFromCamera(localVector2D.set(xFactor * 2 - 1, yFactor * 2 + 1), camera);
     editorPlaneMesh.update();
     const intersectionPoint = localRaycaster.ray.intersectPlane(editorPlaneMesh.plane, localVector);
-    console.log('intersection', !!intersectionPoint);
     if (intersectionPoint) {
       const leftIntersectionPoint = editorPlaneMesh.leftLine.closestPointToPoint(intersectionPoint, true, localVector2);
       const topIntersectionPoint = editorPlaneMesh.topLine.closestPointToPoint(intersectionPoint, true, localVector3);
