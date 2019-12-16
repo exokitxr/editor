@@ -276,10 +276,33 @@ editor.addEventListener('blur', () => {
 editor.language = new Textor.JavaScriptLanguage();
 editor.theme = editor.themeManager.get("dark");
 editor.text = `\
-<script src="three.js"></script>
-<script>
-  console.log('loaded');
-</script>
+<xr-site>
+  <script src="three.js"></script>
+  <script>
+    const scene = new THREE.Scene();
+    const camera = new THREE.Camera();
+    const renderer = new THREE.WebGLRenderer({
+      alpha: true,
+      antialias: true,
+    });
+
+    const cubeMesh = new THREE.Mesh(new THREE.BoxBufferGeometry(0.1, 0.1, 0.1), new THREE.MeshBasicMaterial({
+      color: 0xFF0000,
+    }));
+    scene.add(cubeMesh);
+
+    const xrSite = document.querySelector('xr-site');
+    xrSite.requestSession().then(session => {
+      renderer.vr.enabled = true;
+      renderer.vr.setSession(session);
+
+      function animate() {
+        renderer.render(scene, camera);
+      }
+      renderer.vr.setAnimationLoop(animate);
+    });
+  </script>
+</xr-site>
 `;
 /* editor._textController._textArea.addEventListener('focus', () => {
   // nothing
