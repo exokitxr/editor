@@ -414,6 +414,127 @@ const _updateSize = () => {
 _updateSize();
 window.addEventListener('resize', _updateSize);
 
+let loginToken = null;
+const loginUrl = 'https://login.exokit.org/';
+const _setLoginToken = newLoginToken => {
+  loginToken = newLoginToken;
+};
+async function doLogin(email, code) {
+  const res = await fetch(`${loginUrl}?email=${encodeURIComponent(email)}&code=${encodeURIComponent(code)}`, {
+    method: 'POST',
+  });
+  if (res.ok) {
+    const newLoginToken = await res.json();
+
+    await storage.set('loginToken', newLoginToken);
+
+    _setLoginToken(newLoginToken);
+
+    // loginNameStatic.innerText = loginToken.name;
+    // loginEmailStatic.innerText = loginToken.email;
+
+    topDocument.body.classList.add('logged-in');
+    loginForm.classList.remove('phase-1');
+    loginForm.classList.remove('phase-2');
+    loginForm.classList.add('phase-3');
+
+    await _loadInventory();
+
+    return true;
+  } else {
+    return false;
+  }
+}
+const storage = {
+  async get(k) {
+    const s = localStorage.getItem(k);
+    if (typeof s === 'string') {
+      return JSON.parse(s);
+    } else {
+      return undefined;
+    }
+  },
+  async set(k, v) {
+    localStorage.setItem(k, JSON.stringify(v));
+  },
+  async remove(k) {
+    localStorage.removeItem(k);
+  },
+};
+
+const loginForm = topDocument.getElementById('login-form');
+const loginEmail = topDocument.getElementById('login-email');
+const loginNameStatic = topDocument.getElementById('login-name-static');
+const loginEmailStatic = topDocument.getElementById('login-email-static');
+const statusNotConnected = topDocument.getElementById('status-not-connected');
+const statusConnected = topDocument.getElementById('status-connected');
+const loginVerificationCode = topDocument.getElementById('login-verification-code');
+const loginNotice = topDocument.getElementById('login-notice');
+const loginError = topDocument.getElementById('login-error');
+const logoutButton = topDocument.getElementById('logout-button');
+loginForm.onsubmit = async e => {
+  e.preventDefault();
+
+  if (loginForm.classList.contains('phase-1') && loginEmail.value) {
+    loginNotice.innerHTML = '';
+    loginError.innerHTML = '';
+    loginForm.classList.remove('phase-1');
+
+    const res = await fetch(`${loginUrl}?email=${encodeURIComponent(loginEmail.value)}`, {
+      method: 'POST',
+    })
+    if (res.ok) {
+      loginNotice.innerText = `Code sent to ${loginEmail.value}!`;
+      loginForm.classList.add('phase-2');
+
+      return res.blob();
+    } else if (res.status === 403) {
+      loginError.innerText = `${loginEmail.value} is not in the beta yet :(`;
+
+      loginForm.classList.add('phase-1');
+    } else {
+      throw new Error(`invalid status code: ${res.status}`);
+    }
+  } else if (loginForm.classList.contains('phase-2') && loginEmail.value && loginVerificationCode.value) {
+    loginNotice.innerHTML = '';
+    loginError.innerHTML = '';
+    loginForm.classList.remove('phase-2');
+
+    await doLogin(loginEmail.value, loginVerificationCode.value);
+  } else if (loginForm.classList.contains('phase-3')) {
+    await storage.remove('loginToken');
+
+    window.top.location.reload();
+  }
+};
+(async () => {
+  const localLoginToken = await storage.get('loginToken');
+  if (localLoginToken) {
+    const res = await fetch(`${loginUrl}?email=${encodeURIComponent(localLoginToken.email)}&token=${encodeURIComponent(localLoginToken.token)}`, {
+      method: 'POST',
+    })
+    if (res.ok) {
+      const newLoginToken = await res.json();
+
+      await storage.set('loginToken', newLoginToken);
+
+      _setLoginToken(newLoginToken);
+
+      // loginNameStatic.innerText = loginToken.name;
+      // loginEmailStatic.innerText = loginToken.email;
+
+      topDocument.body.classList.add('logged-in');
+      loginForm.classList.remove('phase-1');
+      loginForm.classList.remove('phase-2');
+      loginForm.classList.add('phase-3');
+    } else {
+      await storage.remove('loginToken');
+
+      console.warn(`invalid status code: ${res.status}`);
+    }
+  }
+})();
+
 function animate() {
   // console.log('needs update', xtermPlaneMesh.material.map.image);
   // xtermPlaneMesh.material.map.needsUpdate = true;
