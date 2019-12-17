@@ -397,6 +397,10 @@ header > .login-form.phase-3 > .phaseless-content
 import ew from 'https://web2.exokit.org/ew.js';
 // import ew from './exokit-web/ew.js';
 
+window.document.addEventListener('dragover', e => {
+  e.preventDefault();
+});
+
 let xrEngine = null;
 (async () => {
   const enterXrButton = document.getElementById('enter-xr-button');
