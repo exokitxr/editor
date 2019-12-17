@@ -547,8 +547,8 @@ var Textor;
             this._canvas.addEventListener("touchmove", this._canvas_touchMoveHandler, false);
             this._canvas.addEventListener("touchend", this._canvas_touchEndHandler, false);
             this._canvas.addEventListener("mousedown", this._canvas_mouseDownHandler, false);
-            window.addEventListener("mousemove", this._window_mouseMoveHandler, false);
-            window.addEventListener("mouseup", this._window_mouseUpHandler, false);
+            this._canvas.addEventListener("mousemove", this._window_mouseMoveHandler, false);
+            this._canvas.addEventListener("mouseup", this._window_mouseUpHandler, false);
             this._textArea.addEventListener("focus", this._textArea_focusHandler, false);
             this._textArea.addEventListener("blur", this._textArea_blurHandler, false);
             this._textArea.addEventListener("cut", this._textArea_cutHandler, false);
@@ -568,8 +568,8 @@ var Textor;
             configurable: true
         });
         TextController.prototype.dispose = function () {
-            window.removeEventListener("mousemove", this._window_mouseMoveHandler);
-            window.removeEventListener("mouseup", this._window_mouseUpHandler);
+            this._canvas.removeEventListener("mousemove", this._window_mouseMoveHandler);
+            this._canvas.removeEventListener("mouseup", this._window_mouseUpHandler);
             this._canvas.removeEventListener("mousedown", this._canvas_mouseDownHandler);
             this._canvas.removeEventListener("touchend", this._canvas_touchEndHandler);
             this._canvas.removeEventListener("touchmove", this._canvas_touchMoveHandler);
