@@ -8,10 +8,6 @@ import './textor/dist/javascript.js';
 
 const topDocument = window.top.document;
 
-const peerPoseUpdateRate = 50;
-const walkSpeed = 0.0015;
-const floorPlane = new THREE.Plane().setFromNormalAndCoplanarPoint(new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 0));
-
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
 const localVector3 = new THREE.Vector3();
