@@ -131,6 +131,25 @@ li {
   background-color: #f8f8f8;
   outline: none;
 } */
+.save-dialog,
+.open-dialog,
+.upload-dialog
+{
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 50px;
+  left: 0;
+  width: 300px;
+  padding: 30px;
+  background-color: #FFF;
+}
+.save-dialog:not(.open),
+.open-dialog:not(.open),
+.upload-dialog:not(.open)
+{
+  display: none;
+}
 a {
   color: #AAA;
   text-decoration: none;
@@ -352,6 +371,16 @@ header > .login-form.phase-3 > .phaseless-content
           <div class="phase-content phaseless-content">
             <div>Working...</div>
           </div>
+        </form>
+
+        <form class=save-dialog id=save-dialog>
+          <input type=text placeholder="Enter file name..." id=save-name-input>
+          <input type=submit value="Save">
+        </form>
+        <div class=open-dialog id=open-dialog></div>
+        <form class=upload-dialog id=upload-dialog>
+          <input type=text placeholder="Enter file name..." id=upload-name-input>
+          <input type=submit value="Upload">
         </form>
       </header>
 
