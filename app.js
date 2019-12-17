@@ -535,6 +535,175 @@ loginForm.onsubmit = async e => {
   }
 })();
 
+const saveDialog = topDocument.getElementById('save-dialog');
+// console.log('got dialog', saveDialog, topDocument);
+const saveNameInput = topDocument.getElementById('save-name-input');
+const openDialog = topDocument.getElementById('open-dialog');
+const uploadDialog = topDocument.getElementById('upload-dialog');
+const uploadNameInput = topDocument.getElementById('upload-name-input');
+const _keydown = async e => {
+  const _closeAll = () => {
+    saveDialog.classList.remove('open');
+    openDialog.classList.remove('open');
+    uploadDialog.classList.remove('open');
+  };
+
+  switch (e.which) {
+    case 27: {
+      _closeAll();
+      break;
+    }
+    case 83: { // S
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        _closeAll();
+        saveDialog.classList.add('open');
+        saveNameInput.focus();
+      }
+      break;
+    }
+    case 79: { // O
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        _closeAll();
+        openDialog.classList.add('open');
+        const res = await fetch(`https://upload.exokit.org/${loginToken.name}`);
+        const files = await res.json();
+        openDialog.innerHTML = files.map(filename => {
+          return `<nav class=a-file draggable=true>
+            <div class=overlay>
+              <div class=multibutton>
+                <a href="https://content.exokit.org/${encodeURI(filename)}" class="button first last load-button">Load</a>
+              </div>
+            </div>
+            <i class="fas fa-file"></i>
+            <div class=name>${escape(filename)}</name>
+          </nav>`;
+        }).join('\n');
+        Array.from(openDialog.querySelectorAll('.a-file')).forEach(aFile => {
+          const button = aFile.querySelector('.button');
+          const src = button.getAttribute('href');
+          button.addEventListener('click', async e => {
+            e.preventDefault();
+            const res = await fetch(src);
+            const html = await res.text();
+            editor.text = html;
+          });
+        });
+      }
+      break;
+    }
+  }
+};
+window.addEventListener('keydown', _keydown);
+
+saveDialog.addEventListener('submit', e => {
+  e.preventDefault();
+
+  const username = loginToken.name;
+  const filename = saveNameInput.value;
+  const headers = {
+    'Content-Type': 'text/html',
+  };
+  fetch(`https://upload.exokit.org/${username}/${filename}?email=${encodeURIComponent(loginToken.email)}&token=${encodeURIComponent(loginToken.token)}`, {
+    method: 'POST',
+    headers,
+  })
+    .then(res => {
+      if (res.ok) {
+        return res.text();
+      } else {
+        throw new Errors(`invalid status code: ${res.status}`);
+      }
+    })
+    .then(u => {
+      console.log('save result 1', u);
+      return fetch(u, {
+        method: 'PUT',
+        body: editor.text,
+        headers,
+      });
+    })
+    .then(res => {
+      if (res.ok) {
+        return res.text();
+      } else {
+        throw new Errors(`invalid status code: ${res.status}`);
+      }
+    })
+    .then(s => {
+      console.log('save result 2', `https://content.exokit.org/${username}/${filename}`);
+
+      saveDialog.classList.remove('open');
+      saveNameInput.value = '';
+    });
+});
+
+const _uploadFile = file => {
+  const username = loginToken.name;
+  const filename = file.name;
+  const headers = {
+    'Content-Type': 'text/html',
+  };
+  fetch(`https://upload.exokit.org/${username}/${filename}?email=${encodeURIComponent(loginToken.email)}&token=${encodeURIComponent(loginToken.token)}`, {
+    method: 'POST',
+    headers,
+  })
+    .then(res => {
+      if (res.ok) {
+        return res.text();
+      } else {
+        throw new Errors(`invalid status code: ${res.status}`);
+      }
+    })
+    .then(u => {
+      return fetch(u, {
+        method: 'PUT',
+        body: file,
+        headers,
+      });
+    })
+    .then(res => {
+      if (res.ok) {
+        return res.text();
+      } else {
+        console.warn(`invalid status code: ${res.status}`);
+        return Promise.resolve([]);
+      }
+    })
+    .then(j => {
+      console.log('upload complete', j);
+      // const {url} = j;
+    })
+    .catch(err => {
+      console.warn(err);
+    });
+};
+window.document.addEventListener('dragover', e => {
+  e.preventDefault();
+});
+window.document.addEventListener('drop', async e => {
+  e.preventDefault();
+
+  saveDialog.classList.remove('open');
+  openDialog.classList.remove('open');
+  uploadDialog.classList.remove('open');
+
+  for (var i = 0; i < e.dataTransfer.items.length; i++) {
+    const item = e.dataTransfer.items[i];
+    if (item.kind === 'file') {
+      const file = item.getAsFile();
+      uploadDialog.classList.add('open');
+      uploadDialog.file = file;
+      uploadNameInput.value = file.name;
+    }
+  }
+});
+uploadDialog.addEventListener('submit', e => {
+  e.preventDefault();
+  _uploadFile(uploadDialog.file);
+});
+
 function animate() {
   // console.log('needs update', xtermPlaneMesh.material.map.image);
   // xtermPlaneMesh.material.map.needsUpdate = true;
