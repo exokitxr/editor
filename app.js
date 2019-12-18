@@ -586,13 +586,15 @@ const _keydown = async e => {
             const hash = '0x' + filename.match(/([^\/]*)$/)[1];
             filename = filename.replace(/\/[^\/]*?$/, '');
             const id = ids[i];
+            const contentUrl = `https://content.exokit.org/${loginToken.name}/${filename}`;
+            const viewerUrl = `https://viewer.exokit.org/?p=${encodeURIComponent(contentUrl)}`;
             return `<nav class=a-file draggable=true>
               <div class=overlay>
                 <div class=multibutton>
-                  <a href="https://content.exokit.org/${loginToken.name}/${filename}" class="button first last load-button">Load</a>
+                  <a href="${contentUrl}" class="button first last load-button">Load</a>
                   <input type=number value=1 min=0 class="mint-number-input">
                   <nav class="button first last mint-button" token="${hash}">Mint</nav>
-                  <a href="https://view.webaverse.com/${loginToken.name}/${filename}" class="button first last mint-button">Open</a>
+                  <a href="${viewerUrl}" class="button first last view-button">View</a>
                   ${id !== 0 ?
                     `<a href="https://rinkeby.opensea.io/assets/${window.top.contract.address}/${id}" class="button first last external-link-button">OpenSea</a>`
                   :
