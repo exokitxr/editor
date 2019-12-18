@@ -150,6 +150,13 @@ li {
 {
   display: none;
 }
+.dialog-row {
+  display: flex;
+  align-items: center;
+}
+.dim {
+  color: #CCC;
+}
 a {
   color: #AAA;
   text-decoration: none;
@@ -374,7 +381,10 @@ header > .login-form.phase-3 > .phaseless-content
         </form>
 
         <form class=save-dialog id=save-dialog>
-          <input type=text placeholder="Enter file name..." id=save-name-input>
+          <div class=dialog-row>
+            <input type=text placeholder="Enter file name..." id=save-name-input>
+            <span class=dim>.html</span>
+          </div>
           <input type=submit value="Save">
         </form>
         <div class=open-dialog id=open-dialog></div>
