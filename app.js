@@ -277,7 +277,7 @@ editor.language = new Textor.JavaScriptLanguage();
 editor.theme = editor.themeManager.get("dark");
 editor.text = `\
 <xr-site>
-  <script src="three.js"></script>
+  <script src="https://rawcdn.githack.com/mrdoob/three.js/6aad4cd4713660e9379688766c4405526683a141/build/three.js"></script>
   <script>
     const scene = new THREE.Scene();
     const camera = new THREE.Camera();
