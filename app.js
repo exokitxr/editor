@@ -605,34 +605,20 @@ saveDialog.addEventListener('submit', e => {
   const headers = {
     'Content-Type': 'text/html',
   };
-  fetch(`https://upload.exokit.org/${username}/${filename}?email=${encodeURIComponent(loginToken.email)}&token=${encodeURIComponent(loginToken.token)}`, {
-    method: 'POST',
+  fetch(`https://hashes.exokit.org/${username}/${filename}?email=${encodeURIComponent(loginToken.email)}&token=${encodeURIComponent(loginToken.token)}`, {
+    method: 'PUT',
     headers,
+    body: editor.text,
   })
     .then(res => {
       if (res.ok) {
         return res.text();
       } else {
-        throw new Errors(`invalid status code: ${res.status}`);
-      }
-    })
-    .then(u => {
-      console.log('save result 1', u);
-      return fetch(u, {
-        method: 'PUT',
-        body: editor.text,
-        headers,
-      });
-    })
-    .then(res => {
-      if (res.ok) {
-        return res.text();
-      } else {
-        throw new Errors(`invalid status code: ${res.status}`);
+        throw new Error(`invalid status code: ${res.status}`);
       }
     })
     .then(s => {
-      console.log('save result 2', `https://content.exokit.org/${username}/${filename}`);
+      console.log('save result 2', `https://content.exokit.org/${username}/${filename}`, s);
 
       saveDialog.classList.remove('open');
       saveNameInput.value = '';
@@ -645,7 +631,7 @@ const _uploadFile = file => {
   const headers = {
     'Content-Type': 'text/html',
   };
-  fetch(`https://upload.exokit.org/${username}/${filename}?email=${encodeURIComponent(loginToken.email)}&token=${encodeURIComponent(loginToken.token)}`, {
+  fetch(`https://hashes.exokit.org/${username}/${filename}?email=${encodeURIComponent(loginToken.email)}&token=${encodeURIComponent(loginToken.token)}`, {
     method: 'POST',
     headers,
   })
