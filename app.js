@@ -665,7 +665,7 @@ saveDialog.addEventListener('submit', e => {
   e.preventDefault();
 
   const username = loginToken.name;
-  const filename = saveNameInput.value;
+  const filename = saveNameInput.value + '.html';
   const headers = {
     'Content-Type': 'text/html',
   };
