@@ -293,14 +293,14 @@ editor.text = `\
 
     const xrSite = document.querySelector('xr-site');
     xrSite.requestSession().then(session => {
-      renderer.vr.enabled = true;
-      renderer.vr.setSession(session);
+      renderer.xr.enabled = true;
+      renderer.xr.setSession(session);
 
       function animate() {
         cubeMesh.position.y = Math.sin((Date.now()%5000)/5000 * Math.PI*2);
         renderer.render(scene, camera);
       }
-      renderer.vr.setAnimationLoop(animate);
+      renderer.xr.setAnimationLoop(animate);
     });
   </script>
 </xr-site>
