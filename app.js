@@ -590,10 +590,12 @@ const _keydown = async e => {
               <div class=overlay>
                 <div class=multibutton>
                   <a href="https://content.exokit.org/${loginToken.name}/${filename}" class="button first last load-button">Load</a>
+                  <input type=number value=1 min=0 class="mint-number-input">
+                  <nav class="button first last mint-button" token="${hash}">Mint</nav>
                   ${id !== 0 ?
                     `<a href="https://rinkeby.opensea.io/assets/${window.top.contract.address}/${id}" class="button first last external-link-button">OpenSea</a>`
                   :
-                    `<nav class="button first last mint-button" token="${hash}">Mint</nav>`
+                    ``
                   }
                 </div>
               </div>
@@ -602,6 +604,38 @@ const _keydown = async e => {
             </nav>`;
           }).join('\n');
           Array.from(openDialog.querySelectorAll('.a-file')).forEach(aFile => {
+            const mintNumberInput = aFile.querySelector('.mint-number-input');
+            const mintButton = aFile.querySelector('.mint-button');
+            const hash = mintButton.getAttribute('token');
+            mintButton.addEventListener('click', async () => {
+              const txHash = await new Promise((accept, reject) => {
+                window.top.contract.mint(hash, window.top.web3.currentProvider.selectedAddress, mintNumberInput.value, (err, txHash) => {
+                  if (!err) {
+                    accept(txHash);
+                  } else {
+                    reject(err);
+                  }
+                });
+              });
+              // console.log('minted 1', txHash);
+              const receipt = await new Promise((accept, reject) => {
+                const _recurse = () => {
+                  window.top.web3.eth.getTransactionReceipt(txHash, (err, receipt) => {
+                    if (err) {
+                      reject(err);
+                    } else if (!receipt) {
+                      setTimeout(_recurse, 500);
+                    } else {
+                      accept(receipt);
+                    }
+                  });
+                };
+                _recurse();
+              });
+              // console.log('minted 2', txHash, receipt);
+              await _openFiles();
+            });
+            
             const loadButton = aFile.querySelector('.load-button');
             const src = loadButton.getAttribute('href');
             loadButton.addEventListener('click', async e => {
@@ -614,38 +648,6 @@ const _keydown = async e => {
             externalLinkButton.addEventListener('click', () => {
               
             }); */
-            const mintButton = aFile.querySelector('.mint-button');
-            if (mintButton) {
-              const hash = mintButton.getAttribute('token');
-              mintButton.addEventListener('click', async () => {
-                const txHash = await new Promise((accept, reject) => {
-                  window.top.contract.mint(hash, window.top.web3.currentProvider.selectedAddress, 1, (err, txHash) => {
-                    if (!err) {
-                      accept(txHash);
-                    } else {
-                      reject(err);
-                    }
-                  });
-                });
-                console.log('minted 1', txHash);
-                const receipt = await new Promise((accept, reject) => {
-                  const _recurse = () => {
-                    window.top.web3.eth.getTransactionReceipt(txHash, (err, receipt) => {
-                      if (err) {
-                        reject(err);
-                      } else if (!receipt) {
-                        setTimeout(_recurse, 500);
-                      } else {
-                        accept(receipt);
-                      }
-                    });
-                  };
-                  _recurse();
-                });
-                console.log('minted 2', txHash, receipt);
-                await _openFiles();
-              });
-            }
           });
         };
         await _openFiles();
