@@ -396,7 +396,41 @@ header > .login-form.phase-3 > .phaseless-content
 // import './HelioWebXRPolyfill.js';
 import ew from 'https://web2.exokit.org/ew.js';
 // import ew from './exokit-web/ew.js';
+import './app.js';
 
+let contract = null;
+window.addEventListener('load', async () => {
+  // Modern dapp browsers...
+  if (window.ethereum) {
+      window.web3 = new window.top.Web3(ethereum);
+      try {
+          // Request account access if needed
+          await window.ethereum.enable();
+          // Acccounts now exposed
+          // web3.eth.sendTransaction({/* ... */});
+      } catch (error) {
+          // User denied account access...
+      }
+  }
+  // Legacy dapp browsers...
+  else if (window.web3) {
+      window.web3 = new window.Web3(window.web3.currentProvider);
+      // Acccounts always exposed
+      // web3.eth.sendTransaction({/* ... */});
+  }
+  // Non-dapp browsers...
+  else {
+      console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
+  }
+
+  const ress = await Promise.all([
+    fetch('abi.json'),
+    fetch('address.json'),
+  ]);
+  const [jsonInterface, address] = await Promise.all(ress.map(res => res.json()));
+  contract = web3.eth.contract(jsonInterface).at(address);
+  window.contract = contract; // XXX
+});
 window.document.addEventListener('dragover', e => {
   e.preventDefault();
 });
