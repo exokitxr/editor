@@ -567,29 +567,88 @@ const _keydown = async e => {
         e.preventDefault();
         _closeAll();
         openDialog.classList.add('open');
-        const res = await fetch(`https://upload.exokit.org/${loginToken.name}`);
-        const files = await res.json();
-        openDialog.innerHTML = files.map(filename => {
-          return `<nav class=a-file draggable=true>
-            <div class=overlay>
-              <div class=multibutton>
-                <a href="https://content.exokit.org/${encodeURI(filename)}" class="button first last load-button">Load</a>
+
+        const _openFiles = async () => {
+          const res = await fetch(`https://upload.exokit.org/${loginToken.name}`);
+          const files = await res.json();
+          const ids = await Promise.all(files.map(filename => new Promise((accept, reject) => {
+            const hash = '0x' + filename.match(/([^\/]*)$/)[1];
+            window.top.contract.getId(hash, (err, id) => {
+              if (!err) {
+                accept(id.toNumber());
+              } else {
+                reject(err);
+              }
+            });
+          })));
+
+          openDialog.innerHTML = files.map((filename, i) => {
+            const hash = '0x' + filename.match(/([^\/]*)$/)[1];
+            filename = filename.replace(/\/[^\/]*?$/, '');
+            const id = ids[i];
+            return `<nav class=a-file draggable=true>
+              <div class=overlay>
+                <div class=multibutton>
+                  <a href="https://content.exokit.org/${loginToken.name}/${filename}" class="button first last load-button">Load</a>
+                  ${id !== 0 ?
+                    `<a href="https://rinkeby.opensea.io/assets/${window.top.contract.address}/${id}" class="button first last external-link-button">OpenSea</a>`
+                  :
+                    `<nav class="button first last mint-button" token="${hash}">Mint</nav>`
+                  }
+                </div>
               </div>
-            </div>
-            <i class="fas fa-file"></i>
-            <div class=name>${escape(filename)}</name>
-          </nav>`;
-        }).join('\n');
-        Array.from(openDialog.querySelectorAll('.a-file')).forEach(aFile => {
-          const button = aFile.querySelector('.button');
-          const src = button.getAttribute('href');
-          button.addEventListener('click', async e => {
-            e.preventDefault();
-            const res = await fetch(src);
-            const html = await res.text();
-            editor.text = html;
+              <i class="fas fa-file"></i>
+              <div class=name>${escape(filename)}</name>
+            </nav>`;
+          }).join('\n');
+          Array.from(openDialog.querySelectorAll('.a-file')).forEach(aFile => {
+            const loadButton = aFile.querySelector('.load-button');
+            const src = loadButton.getAttribute('href');
+            loadButton.addEventListener('click', async e => {
+              e.preventDefault();
+              const res = await fetch(src);
+              const html = await res.text();
+              editor.text = html;
+            });
+            /* const externalLinkButton = aFile.querySelector('.external-link-button');
+            externalLinkButton.addEventListener('click', () => {
+              
+            }); */
+            const mintButton = aFile.querySelector('.mint-button');
+            if (mintButton) {
+              const hash = mintButton.getAttribute('token');
+              mintButton.addEventListener('click', async () => {
+                const txHash = await new Promise((accept, reject) => {
+                  window.top.contract.mint(hash, window.top.web3.currentProvider.selectedAddress, 1, (err, txHash) => {
+                    if (!err) {
+                      accept(txHash);
+                    } else {
+                      reject(err);
+                    }
+                  });
+                });
+                console.log('minted 1', txHash);
+                const receipt = await new Promise((accept, reject) => {
+                  const _recurse = () => {
+                    window.top.web3.eth.getTransactionReceipt(txHash, (err, receipt) => {
+                      if (err) {
+                        reject(err);
+                      } else if (!receipt) {
+                        setTimeout(_recurse, 500);
+                      } else {
+                        accept(receipt);
+                      }
+                    });
+                  };
+                  _recurse();
+                });
+                console.log('minted 2', txHash, receipt);
+                await _openFiles();
+              });
+            }
           });
-        });
+        };
+        await _openFiles();
       }
       break;
     }
