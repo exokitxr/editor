@@ -592,6 +592,7 @@ const _keydown = async e => {
                   <a href="https://content.exokit.org/${loginToken.name}/${filename}" class="button first last load-button">Load</a>
                   <input type=number value=1 min=0 class="mint-number-input">
                   <nav class="button first last mint-button" token="${hash}">Mint</nav>
+                  <a href="https://view.webaverse.com/${loginToken.name}/${filename}" class="button first last mint-button">Open</a>
                   ${id !== 0 ?
                     `<a href="https://rinkeby.opensea.io/assets/${window.top.contract.address}/${id}" class="button first last external-link-button">OpenSea</a>`
                   :
