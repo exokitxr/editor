@@ -653,7 +653,7 @@ const _uploadFile = file => {
       if (res.ok) {
         return res.text();
       } else {
-        throw new Errors(`invalid status code: ${res.status}`);
+        throw new Error(`invalid status code: ${res.status}`);
       }
     })
     .then(u => {
