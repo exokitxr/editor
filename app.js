@@ -536,7 +536,6 @@ loginForm.onsubmit = async e => {
 })();
 
 const saveDialog = topDocument.getElementById('save-dialog');
-// console.log('got dialog', saveDialog, topDocument);
 const saveNameInput = topDocument.getElementById('save-name-input');
 const openDialog = topDocument.getElementById('open-dialog');
 const uploadDialog = topDocument.getElementById('upload-dialog');
