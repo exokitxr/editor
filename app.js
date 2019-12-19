@@ -660,32 +660,56 @@ const _keydown = async e => {
 };
 window.addEventListener('keydown', _keydown);
 
-saveDialog.addEventListener('submit', e => {
+let animationCb = null;
+saveDialog.addEventListener('submit', async e => {
   e.preventDefault();
+
+  const screenshotBlob = await new Promise((accept, reject) => {
+    const topCanvas = window.top.xrEngine.canvas;
+    const canvas = document.createElement('canvas');
+    canvas.width = topCanvas.width;
+    canvas.height = topCanvas.height;
+    const ctx = canvas.getContext('2d');
+
+    animationCb = () => {
+      ctx.drawImage(topCanvas, 0, 0);
+      canvas.toBlob(accept, 'image/png');
+    };
+  });
+  const screenshotUrl = URL.createObjectURL(screenshotBlob);
+  console.log('got screenshot', screenshotUrl);
 
   const username = loginToken.name;
   const filename = saveNameInput.value + '.html';
   const headers = {
     'Content-Type': 'text/html',
   };
-  fetch(`https://hashes.exokit.org/${username}/${filename}?email=${encodeURIComponent(loginToken.email)}&token=${encodeURIComponent(loginToken.token)}`, {
+  const res = await fetch(`https://hashes.exokit.org/${username}/${filename}?email=${encodeURIComponent(loginToken.email)}&token=${encodeURIComponent(loginToken.token)}`, {
     method: 'PUT',
     headers,
     body: editor.text,
-  })
-    .then(res => {
-      if (res.ok) {
-        return res.text();
-      } else {
-        throw new Error(`invalid status code: ${res.status}`);
-      }
-    })
-    .then(s => {
-      console.log('save result 2', `https://content.exokit.org/${username}/${filename}`, s);
+  });
+  if (res.ok) {
+    const s = await res.text();
+    console.log('saved html', `https://content.exokit.org/${username}/${filename}`, s);
+
+    const res2 = await fetch(`https://preview.exokit.org/${username}/${filename}?email=${encodeURIComponent(loginToken.email)}&token=${encodeURIComponent(loginToken.token)}`, {
+      method: 'PUT',
+      body: screenshotBlob,
+    });
+
+    if (res2.ok) {
+      const s2 = await res2.text();
+      console.log('saved screenshot', `https://content.exokit.org/${username}/${filename}`, s2);
 
       saveDialog.classList.remove('open');
       saveNameInput.value = '';
-    });
+    } else {
+      throw new Error(`invalid status code: ${res.status}`);
+    }
+  } else {
+    throw new Error(`invalid status code: ${res.status}`);
+  }
 });
 
 const _uploadFile = file => {
@@ -768,6 +792,11 @@ function animate() {
   }
 
   renderer.render(scene, camera);
+
+  if (animationCb) {
+    animationCb();
+    animationCb = null;
+  }
 }
 renderer.setAnimationLoop(animate);
 

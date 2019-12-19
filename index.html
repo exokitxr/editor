@@ -444,7 +444,7 @@ window.document.addEventListener('dragover', e => {
   e.preventDefault();
 });
 
-let xrEngine = null;
+window.xrEngine = null;
 (async () => {
   const enterXrButton = document.getElementById('enter-xr-button');
   const noXrButton = document.getElementById('no-xr-button');
@@ -470,7 +470,7 @@ let xrEngine = null;
 
   await ew.register();
 
-  xrEngine = new XREngine();
+  const xrEngine = new XREngine();
   xrEngine.src = 'app.html';
   /* xrEngine.addEventListener('message', async e => {
     const {data} = e;
@@ -494,6 +494,8 @@ let xrEngine = null;
       });
     });
   });
+
+  window.xrEngine = xrEngine;
 })();
     </script>
   </body>
