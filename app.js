@@ -567,20 +567,20 @@ const _keydown = async e => {
         _closeAll();
         openDialog.classList.add('open');
 
-        const _openFiles = async () => {
-          const res = await fetch(`https://upload.exokit.org/${loginToken.name}`);
-          const files = await res.json();
-          const ids = await Promise.all(files.map(filename => new Promise((accept, reject) => {
-            const hash = '0x' + filename.match(/([^\/]*)$/)[1];
-            window.top.contract.getId(hash, (err, id) => {
-              if (!err) {
-                accept(id.toNumber());
-              } else {
-                reject(err);
-              }
-            });
-          })));
+        const res = await fetch(`https://upload.exokit.org/${loginToken.name}`);
+        const files = await res.json();
+        const ids = await Promise.all(files.map(filename => new Promise((accept, reject) => {
+          const hash = '0x' + filename.match(/([^\/]*)$/)[1];
+          window.top.contract.getId(hash, (err, id) => {
+            if (!err) {
+              accept(id.toNumber());
+            } else {
+              reject(err);
+            }
+          });
+        })));
 
+        const _drawFiles = () => {
           openDialog.innerHTML = files.map((filename, i) => {
             const hash = '0x' + filename.match(/([^\/]*)$/)[1];
             filename = filename.replace(/\/[^\/]*?$/, '');
@@ -605,54 +605,55 @@ const _keydown = async e => {
               <div class=name>${escape(filename)}</name>
             </nav>`;
           }).join('\n');
-          Array.from(openDialog.querySelectorAll('.a-file')).forEach(aFile => {
-            const mintNumberInput = aFile.querySelector('.mint-number-input');
-            const mintButton = aFile.querySelector('.mint-button');
-            const hash = mintButton.getAttribute('token');
-            mintButton.addEventListener('click', async () => {
-              const txHash = await new Promise((accept, reject) => {
-                window.top.contract.mint(hash, window.top.web3.currentProvider.selectedAddress, mintNumberInput.value, (err, txHash) => {
-                  if (!err) {
-                    accept(txHash);
-                  } else {
+        };
+        _drawFiles();
+        Array.from(openDialog.querySelectorAll('.a-file')).forEach((aFile, i) => {
+          const mintNumberInput = aFile.querySelector('.mint-number-input');
+          const mintButton = aFile.querySelector('.mint-button');
+          const hash = mintButton.getAttribute('token');
+          mintButton.addEventListener('click', async () => {
+            const txHash = await new Promise((accept, reject) => {
+              window.top.contract.mint(hash, window.top.web3.currentProvider.selectedAddress, mintNumberInput.value, (err, txHash) => {
+                if (!err) {
+                  accept(txHash);
+                } else {
+                  reject(err);
+                }
+              });
+            });
+            console.log('minted 1', txHash);
+            const receipt = await new Promise((accept, reject) => {
+              const _recurse = () => {
+                window.top.web3.eth.getTransactionReceipt(txHash, (err, receipt) => {
+                  if (err) {
                     reject(err);
+                  } else if (!receipt) {
+                    setTimeout(_recurse, 500);
+                  } else {
+                    accept(receipt);
                   }
                 });
-              });
-              // console.log('minted 1', txHash);
-              const receipt = await new Promise((accept, reject) => {
-                const _recurse = () => {
-                  window.top.web3.eth.getTransactionReceipt(txHash, (err, receipt) => {
-                    if (err) {
-                      reject(err);
-                    } else if (!receipt) {
-                      setTimeout(_recurse, 500);
-                    } else {
-                      accept(receipt);
-                    }
-                  });
-                };
-                _recurse();
-              });
-              // console.log('minted 2', txHash, receipt);
-              await _openFiles();
+              };
+              _recurse();
             });
-            
-            const loadButton = aFile.querySelector('.load-button');
-            const src = loadButton.getAttribute('href');
-            loadButton.addEventListener('click', async e => {
-              e.preventDefault();
-              const res = await fetch(src);
-              const html = await res.text();
-              editor.text = html;
-            });
-            /* const externalLinkButton = aFile.querySelector('.external-link-button');
-            externalLinkButton.addEventListener('click', () => {
-              
-            }); */
+            console.log('minted 2', txHash, receipt);
+            ids[i] = 1;
+            _drawFiles();
           });
-        };
-        await _openFiles();
+          
+          const loadButton = aFile.querySelector('.load-button');
+          const src = loadButton.getAttribute('href');
+          loadButton.addEventListener('click', async e => {
+            e.preventDefault();
+            const res = await fetch(src);
+            const html = await res.text();
+            editor.text = html;
+          });
+          /* const externalLinkButton = aFile.querySelector('.external-link-button');
+          externalLinkButton.addEventListener('click', () => {
+            
+          }); */
+        });
       }
       break;
     }
