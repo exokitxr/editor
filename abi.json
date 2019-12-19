@@ -490,6 +490,27 @@
 		"inputs": [
 			{
 				"internalType": "uint256",
+				"name": "ui",
+				"type": "uint256"
+			}
+		],
+		"name": "uint2hex",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"payable": false,
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"internalType": "uint256",
 				"name": "_id",
 				"type": "uint256"
 			}
