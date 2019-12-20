@@ -3,6 +3,8 @@ import './OrbitControls.js';
 import Textor from './textor/dist/texteditor.js';
 import './textor/dist/javascript.js';
 
+console.log('load app.js 1');
+
 // import './webxr-polyfill.module.js';
 // import './HelioWebXRPolyfill.js';
 
@@ -887,3 +889,5 @@ renderer.domElement.addEventListener('click', e => {
     document.activeElement.blur();
   }
 });
+
+console.log('load app.js 2');
