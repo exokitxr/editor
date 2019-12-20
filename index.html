@@ -437,7 +437,7 @@ window.addEventListener('load', async () => {
     fetch('address.json'),
   ]);
   const [jsonInterface, address] = await Promise.all(ress.map(res => res.json()));
-  contract = web3.eth.contract(jsonInterface).at(address);
+  contract = window.web3 && window.web3.eth.contract(jsonInterface).at(address);
   window.contract = contract; // XXX
 });
 window.document.addEventListener('dragover', e => {
