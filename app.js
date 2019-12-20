@@ -440,8 +440,6 @@ async function doLogin(email, code) {
     loginForm.classList.remove('phase-2');
     loginForm.classList.add('phase-3');
 
-    await _loadInventory();
-
     return true;
   } else {
     return false;
