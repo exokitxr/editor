@@ -567,10 +567,27 @@ const _keydown = async e => {
         _closeAll();
         openDialog.classList.add('open');
 
-        const res = await fetch(`https://upload.exokit.org/${loginToken.name}`);
-        const files = await res.json();
-        const ids = await Promise.all(files.map(filename => new Promise((accept, reject) => {
-          const hash = '0x' + filename.match(/([^\/]*)$/)[1];
+        const res = await fetch(`https://content.exokit.org/users/${loginToken.name}`);
+        const root = await res.json();
+        const files = [];
+        const hashes = [];
+        let keypath = '';
+        const _recurse = node => {
+          keypath += (keypath ? '/' : '') + node.name;
+
+          if (node.hash) {
+            files.push(keypath);
+            hashes.push('0x' + node.hash);
+          }
+          if (node.children) {
+            for (let i = 0; i < node.children.length; i++) {
+              _recurse(node.children[i]);
+            }
+          }
+        };
+        _recurse(root);
+        const ids = await Promise.all(hashes.map(hash => new Promise((accept, reject) => {
+          // const hash = '0x' + filename.match(/([^\/]*)$/)[1];
           window.top.contract.getId(hash, (err, id) => {
             if (!err) {
               accept(id.toNumber());
